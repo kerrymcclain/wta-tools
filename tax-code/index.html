@@ -606,6 +606,8 @@ button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0
     $("clearBtn").hidden = !qRaw;
     ls.set("tcs.query", qRaw);
     const q = normQuery(qRaw);
+    // Search cleared (box emptied after a search): return the PDF to its first page.
+    if (!q && state.query) $("viewer").scrollTo({ top: 0, left: 0, behavior: "auto" });
     state.query = q; state.hits = []; state.listPage = 0; setActive(-1, false);
     if (q.length >= 2) {
       const whole = $("wholeWord").checked;
