@@ -72,40 +72,29 @@
 <style>
 /* Layout: one-screen tool. Navy title band; results column on the left, PDF well on the right (stacked on phones). */
 :root {
-  --bg: #EEF0F4;
-  --panel: #FFFFFF;
-  --ink: #172448;
-  --muted: #5A6480;
-  --line: #D6DBE5;
-  --accent: #3D5A8C;
-  --accent-soft: #E3E9F4;
-  --band: #172448;
+  /* WTA palette: night-sky band, cream body (matches westtexasanalytics.com and the Tools page) */
+  --bg: #FDF4D9;
+  --panel: #FFFBEF;
+  --ink: #1A2A37;
+  --muted: #5E6670;
+  --line: #E7DCC0;
+  --accent: #24394A;
+  --accent-soft: #F5EACB;
+  --band: #24394A;
   --band-ink: #FFF6D8;
-  --band-muted: #A9B4CF;
-  --well: #D9DDE6;
+  --band-muted: #B7C2CC;
+  --well: #EFE3C4;
   --mark: #FFD966;
-  --mark-ink: #172448;
+  --mark-ink: #1A2A37;
   --hl: rgba(255, 196, 0, .32);
   --hl-active: rgba(255, 140, 0, .45);
-  --hl-ring: #E07B00;
+  --hl-ring: #D98A3D;
+  --sun: #D98A3D;
   --danger: #A33A2A;
   --display: "Source Serif 4", Georgia, "Times New Roman", serif;
   --body: "IBM Plex Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0E1527; --panel: #141E36; --ink: #E6EAF4; --muted: #98A3BE; --line: #26324F;
-    --accent: #93B2E6; --accent-soft: #1E2C4C; --band: #0A1020; --band-ink: #FFF6D8; --band-muted: #8E9AB8;
-    --well: #0A1020; --mark: #E8B93A; --mark-ink: #10172B; --hl: rgba(255, 196, 0, .32);
-    --hl-active: rgba(255, 140, 0, .45); --hl-ring: #FFA43A; --danger: #F08A78; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0E1527; --panel: #141E36; --ink: #E6EAF4; --muted: #98A3BE; --line: #26324F;
-  --accent: #93B2E6; --accent-soft: #1E2C4C; --band: #0A1020; --band-ink: #FFF6D8; --band-muted: #8E9AB8;
-  --well: #0A1020; --mark: #E8B93A; --mark-ink: #10172B; --hl: rgba(255, 196, 0, .32);
-  --hl-active: rgba(255, 140, 0, .45); --hl-ring: #FFA43A; --danger: #F08A78; color-scheme: dark;
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -125,7 +114,7 @@ button { cursor: pointer; }
 /* Title band */
 .band { background: var(--band); color: var(--band-ink);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 10px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  padding-block: 10px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-bottom: 3px solid var(--sun); }
 .brand { display: grid; gap: 1px; }
 .brand .by { font: 500 10.5px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--band-muted); text-decoration: none; }
 .brand .by:hover { color: var(--band-ink); }
@@ -219,7 +208,7 @@ button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0
 .card p { margin: 0; color: var(--muted); }
 .card ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
 .card a { color: var(--accent); }
-.primary { background: var(--accent); color: var(--panel); border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; justify-self: start; }
+.primary { background: var(--accent); color: var(--band-ink); border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; justify-self: start; }
 .fine { font-size: 11.5px; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 12px; }
 .drop-note { font-size: 12.5px; color: var(--muted); }
 .progress { height: 6px; background: var(--well); border-radius: 3px; overflow: hidden; }
