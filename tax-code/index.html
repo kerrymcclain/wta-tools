@@ -129,6 +129,8 @@ button { cursor: pointer; }
 .brand { display: grid; gap: 1px; }
 .brand .by { font: 500 10.5px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--band-muted); text-decoration: none; }
 .brand .by:hover { color: var(--band-ink); }
+.crumbs { display: flex; align-items: center; gap: 6px; }
+.crumbs .sep { color: var(--band-muted); font-size: 11px; line-height: 1; }
 .band h1 { font: 700 19px/1.2 var(--display); margin: 0; letter-spacing: .005em; text-wrap: balance; }
 .band .doc { color: var(--band-muted); font-size: 12.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .band .doc b { color: var(--band-ink); font-weight: 500; }
@@ -245,7 +247,7 @@ button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0
 <div class="app no-doc" id="app">
   <header class="band">
     <div class="brand">
-      <a class="by" href="https://westtexasanalytics.com" target="_blank" rel="noopener">West Texas Analytics</a>
+      <nav class="crumbs" aria-label="Breadcrumb"><a class="by" href="https://westtexasanalytics.com">WTA</a><span class="sep" aria-hidden="true">›</span><a class="by" href="/">Tools</a></nav>
       <h1>Property Tax Code Search</h1>
     </div>
     <div class="doc" id="docMeta">Texas Property Tax Code · Comptroller publication 96-297</div>
