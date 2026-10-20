@@ -17,6 +17,10 @@
   html, body { margin: 0; }
   body { background: var(--ground); color: var(--ink); font-family: Roboto, system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
   header { background: var(--sky); color: var(--cream); padding: 28px clamp(20px, 6vw, 96px) 40px; border-bottom: 3px solid var(--sun); }
+  .top { display: flex; align-items: center; gap: 24px; }
+  .top nav { margin-left: auto; display: flex; gap: 22px; }
+  .top nav a { color: var(--cream); text-decoration: none; font-weight: 500; font-size: 15px; opacity: 0.85; padding: 4px 0; border-bottom: 2px solid transparent; }
+  .top nav a:hover, .top nav a[aria-current] { opacity: 1; border-bottom-color: var(--sun); }
   .mark { font-family: Bitter, Georgia, serif; font-weight: 700; font-size: 20px; color: var(--cream); text-decoration: none; letter-spacing: -0.02em; }
   h1 { font-family: Bitter, Georgia, serif; font-weight: 700; font-size: clamp(30px, 5vw, 44px); margin: 36px 0 6px; letter-spacing: -0.02em; }
   header p { margin: 0; opacity: 0.85; }
@@ -33,7 +37,13 @@
 </head>
 <body>
 <header>
-  <a class="mark" href="https://westtexasanalytics.com">WTA</a>
+  <div class="top">
+    <a class="mark" href="https://westtexasanalytics.com" title="West Texas Analytics home">WTA</a>
+    <nav aria-label="Main">
+      <a href="/" aria-current="page">Tools</a>
+      <a href="mailto:kerry@wta.llc">Contact</a>
+    </nav>
+  </div>
   <h1>Tools</h1>
   <p>Free tools from West Texas Analytics, LLC</p>
 </header>
@@ -45,7 +55,7 @@
   </a>
 </main>
 <footer>
-  <a href="https://westtexasanalytics.com">West Texas Analytics, LLC</a> · San Angelo, Texas
+  <a href="https://westtexasanalytics.com">West Texas Analytics, LLC</a> · San Angelo, Texas · <a href="mailto:kerry@wta.llc">kerry@wta.llc</a>
 </footer>
 </body>
 </html>
