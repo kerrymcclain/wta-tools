@@ -117,7 +117,10 @@ button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+.app { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+.app > .band { grid-row: 1; }
+.app > .notice { grid-row: 2; }
+.app > .main { grid-row: 3; }
 
 /* Title band */
 .band { background: var(--band); color: var(--band-ink);
@@ -131,6 +134,18 @@ button { cursor: pointer; }
 .band .doc b { color: var(--band-ink); font-weight: 500; }
 .band-btn { background: transparent; border: 1px solid rgba(255,255,255,.28); color: var(--band-ink); border-radius: 6px; padding: 5px 10px; font-size: 12.5px; }
 .band-btn:hover { background: rgba(255,255,255,.08); }
+a.band-btn { text-decoration: none; white-space: nowrap; }
+
+/* New-edition notice */
+.notice { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; background: #FFF3CD; color: #4A3800; border-bottom: 1px solid #E8D48A;
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font-size: 13px; }
+.notice-text { flex: 1 1 280px; }
+.notice-text b { font-weight: 600; }
+.notice-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.notice-btn { background: #4A3800; color: #FFF3CD; border: 0; border-radius: 6px; padding: 5px 10px; font-size: 12.5px; text-decoration: none; white-space: nowrap; }
+button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0 0 0 1px #A88A2A; }
+.notice-x { background: transparent; border: 0; color: #4A3800; font-size: 18px; width: 28px; height: 28px; border-radius: 4px; }
+.notice-x:hover, button.notice-btn:hover { background: rgba(74,56,0,.08); }
 
 /* Main split */
 .main { min-height: 0; display: grid; grid-template-columns: minmax(320px, 400px) 1fr; }
@@ -157,6 +172,8 @@ button { cursor: pointer; }
 .hit[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .hit .where { display: flex; gap: 8px; align-items: baseline; font-size: 12px; margin-bottom: 3px; }
 .hit .sec { font-family: var(--mono); font-weight: 500; color: var(--accent); white-space: nowrap; }
+.hit .num { flex: none; align-self: center; min-width: 20px; height: 18px; padding: 0 5px; border-radius: 9px; background: #3D5A8C;
+  color: #FFFFFF; font: 600 11px/18px var(--mono); text-align: center; font-variant-numeric: tabular-nums; }
 .hit .sec-name { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
 .hit .pg { font-family: var(--mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .hit .snip { font-size: 13px; line-height: 1.45; color: var(--ink); overflow-wrap: anywhere; }
@@ -187,6 +204,11 @@ button { cursor: pointer; }
 .hl-layer { position: absolute; inset: 0; pointer-events: none; }
 .hl-layer div { position: absolute; background: var(--hl); border-radius: 2px; mix-blend-mode: multiply; }
 .hl-layer div.active { background: var(--hl-active); box-shadow: 0 0 0 2px var(--hl-ring); }
+/* Numbered badge beside each highlight; fixed colors because the page itself is always white. */
+.hl-layer .hl-num { position: absolute; transform: translate(calc(-100% - 3px), -50%); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+  background: #3D5A8C; color: #FFFFFF; font: 600 10px/16px var(--mono); text-align: center; font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 1.5px #FFFFFF; white-space: nowrap; }
+.hl-layer .hl-num.active { z-index: 1; }   /* same color as the rest; just kept on top */
 
 /* Empty / loading states */
 .empty { display: grid; place-items: center; padding: 24px; min-height: 100%; box-sizing: border-box; }
@@ -227,9 +249,19 @@ button { cursor: pointer; }
       <h1>Property Tax Code Search</h1>
     </div>
     <div class="doc" id="docMeta">Texas Property Tax Code · Comptroller publication 96-297</div>
+    <a class="band-btn" id="officialLink" href="https://comptroller.texas.gov/taxes/property-tax/docs/96-297-25.pdf" target="_blank" rel="noopener" title="Download the official PDF from the Texas Comptroller">Official PDF ↗</a>
     <button class="band-btn" id="openBtn" type="button">Open PDF…</button>
     <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
   </header>
+
+  <div class="notice" id="notice" role="status" hidden>
+    <span class="notice-text" id="noticeText"></span>
+    <span class="notice-actions">
+      <a class="notice-btn" id="noticeLink" href="https://comptroller.texas.gov/taxes/property-tax/docs/96-297-25.pdf" target="_blank" rel="noopener">Download from the Comptroller ↗</a>
+      <button class="notice-btn" id="noticeOpen" type="button">Open the new PDF…</button>
+      <button class="notice-x" id="noticeClose" type="button" aria-label="Dismiss this notice">×</button>
+    </span>
+  </div>
 
   <div class="main">
     <aside class="side">
@@ -269,7 +301,7 @@ button { cursor: pointer; }
             <h2>Open the Texas Property Tax Code</h2>
             <p>Search every page of the Tax Code, see each match in context, and jump straight to it in the PDF with the words highlighted.</p>
             <ol>
-              <li>Download the PDF from the Comptroller: <a href="https://comptroller.texas.gov/taxes/property-tax/docs/96-297-25.pdf" target="_blank" rel="noopener">96-297-25.pdf</a> (2025 edition, about 3 MB).</li>
+              <li>Download the PDF from the Comptroller: <a id="dlLink" href="https://comptroller.texas.gov/taxes/property-tax/docs/96-297-25.pdf" target="_blank" rel="noopener">96-297-25.pdf</a> (<span id="dlNote">2025 edition, about 3 MB</span>).</li>
               <li>Open it here. This browser keeps a copy, so next time it opens on its own.</li>
             </ol>
             <button class="primary" id="openBtn2" type="button">Open PDF…</button>
@@ -349,6 +381,16 @@ button { cursor: pointer; }
   const PAGE_SIZE = 50;
   const MAX_HITS = 5000;
   const EXAMPLES = ["residence homestead", "appraisal review board", "open-space land", "notice of appraised value", "rendition", "Sec. 41.44"];
+  const BADGE_MAX = 99;   // results numbered 1–99; later hits get no badge
+
+  // The current official copy. edition.json beside this page overrides it, so a new Comptroller posting
+  // only needs that small file updated. These defaults are used when edition.json can't be read (e.g. opened from disk).
+  const EDITION_DEFAULT = {
+    edition: 2025, file: "96-297-25.pdf",
+    url: "https://comptroller.texas.gov/taxes/property-tax/docs/96-297-25.pdf",
+    bytes: 3228704, posted: "2026-01-07"
+  };
+  let current = EDITION_DEFAULT;
 
   const state = {
     pdf: null, sig: "", pages: [],   // pages[i] = { raw, norm, map, w, h, secs: [{off,num,name}], secAtStart }
@@ -482,8 +524,10 @@ button { cursor: pointer; }
       if (p.secs.length) carry = p.secs[p.secs.length - 1];
     }
     state.pages = pages;
-
-    $("docMeta").innerHTML = `<b>${esc(meta.name)}</b> · ${pdf.numPages} pages · ${(meta.size / 1048576).toFixed(1)} MB`;
+    state.meta = meta;
+    state.edition = detectEdition(pages, meta);
+    showDocMeta();
+    checkEdition();
     $("app").classList.remove("no-doc");
     $("empty").hidden = true; $("pages").hidden = false;
     $("q").disabled = false;
@@ -493,6 +537,66 @@ button { cursor: pointer; }
     $("q").value = last;
     runSearch();
     if (window.matchMedia("(min-width: 761px)").matches) $("q").focus();
+  }
+
+  /* ---------- Edition & date ---------- */
+  // The cover page reads "TEXAS PROPERTY TAX CODE 2025 EDITION"; fall back to the 96-297-YY file name.
+  function detectEdition(pages, meta) {
+    const head = pages.slice(0, 5).map(p => p.raw).join(" ");
+    const m = head.match(/\b(20\d\d)\s+EDITION\b/i);
+    if (m) return +m[1];
+    const f = (meta.name || "").match(/96-297-(\d\d)/);
+    return f ? 2000 + +f[1] : null;
+  }
+  function fmtDate(iso) {
+    const [y, mo, d] = String(iso || "").split("-").map(Number);
+    if (!y || !mo || !d) return "";
+    return new Date(y, mo - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+  const isCurrentCopy = () => !!state.meta && state.edition === current.edition && (!current.bytes || state.meta.size === current.bytes);
+  function showDocMeta() {
+    if (!state.meta || !state.pdf) return;
+    const meta = state.meta;
+    const parts = [`<b>${state.edition ? state.edition + " Edition" : esc(meta.name)}</b>`];
+    if (isCurrentCopy() && current.posted) parts.push(`posted ${fmtDate(current.posted)}`);
+    parts.push(`${state.pdf.numPages} pages`);
+    $("docMeta").innerHTML = parts.join(" · ");
+    $("docMeta").title = `${meta.name} · ${(meta.size / 1048576).toFixed(1)} MB`;
+  }
+  function applyEditionConfig() {
+    $("officialLink").href = current.url;
+    $("noticeLink").href = current.url;
+    $("dlLink").href = current.url;
+    $("dlLink").textContent = current.file || current.url.split("/").pop();
+    $("dlNote").textContent = `${current.edition} edition` + (current.bytes ? `, about ${Math.max(1, Math.round(current.bytes / 1048576))} MB` : "");
+  }
+  // Tell the visitor when the PDF they have is older than the Comptroller's current copy.
+  function checkEdition() {
+    const n = $("notice");
+    if (!state.pdf || !state.meta) { n.hidden = true; return; }
+    let msg = "";
+    if (state.edition && state.edition < current.edition) {
+      msg = `<b>The ${current.edition} edition of the Property Tax Code is available.</b> You're viewing the ${state.edition} edition.`;
+    } else if ((!state.edition || state.edition === current.edition) && current.bytes && state.meta.size !== current.bytes) {
+      msg = `<b>The Comptroller has posted an updated copy</b> of the ${current.edition} edition` +
+        (current.posted ? ` (${fmtDate(current.posted)})` : "") + `. Your copy may be out of date.`;
+    }
+    // Dismissal covers this notice for this exact file; a different file or a newer posting shows it again.
+    const key = [current.url, current.bytes, current.edition, state.sig, state.edition].join("|");
+    if (!msg || ls.get("tcs.dismissed") === key) { n.hidden = true; return; }
+    $("noticeText").innerHTML = msg;
+    n.dataset.key = key;
+    n.hidden = false;
+  }
+  async function loadEditionConfig() {
+    try {
+      const r = await fetch("edition.json", { cache: "no-cache" });
+      if (r.ok) {
+        const j = await r.json();
+        if (j && typeof j.url === "string" && /^https:\/\//.test(j.url) && Number.isFinite(+j.edition)) current = { ...EDITION_DEFAULT, ...j, edition: +j.edition };
+      }
+    } catch { /* opened from disk or offline: keep the built-in defaults */ }
+    applyEditionConfig(); showDocMeta(); checkEdition();
   }
 
   /* ---------- Search ---------- */
@@ -551,7 +655,7 @@ button { cursor: pointer; }
     for (let i = start; i < end; i++) {
       const h = state.hits[i], sec = sectionFor(h.p, h.rs);
       html += `<button type="button" class="hit" data-i="${i}" aria-current="${i === state.active}">
-        <span class="where">${sec ? `<span class="sec">§ ${esc(sec.num)}</span><span class="sec-name">${esc(sec.name)}</span>` : `<span class="sec-name"></span>`}<span class="pg">p. ${h.p + 1}</span></span>
+        <span class="where">${i < BADGE_MAX ? `<span class="num" aria-label="Result ${i + 1}">${i + 1}</span>` : ""}${sec ? `<span class="sec">§ ${esc(sec.num)}</span><span class="sec-name">${esc(sec.name)}</span>` : `<span class="sec-name"></span>`}<span class="pg">p. ${h.p + 1}</span></span>
         <span class="snip">${snippet(h)}</span></button>`;
     }
     list.innerHTML = html; list.scrollTop = 0;
@@ -656,18 +760,35 @@ button { cursor: pointer; }
     if (state.contentCache.has(p)) return state.contentCache.get(p);
     const promise = (async () => {
       const page = await state.pdf.getPage(p + 1);
-      const items = textItems(await page.getTextContent());
+      const content = await page.getTextContent();
+      const items = textItems(content);
       const { starts } = joinItems(items);
-      return { items, starts, vp: page.getViewport({ scale: 1 }) };
+      return { items, starts, styles: content.styles || {}, vp: page.getViewport({ scale: 1 }) };
     })();
     state.contentCache.set(p, promise);
     if (state.contentCache.size > 40) state.contentCache.delete(state.contentCache.keys().next().value);
     return promise;
   }
 
+  // Where character a falls within a text item, as a fraction of its width. Measured with the PDF's own font
+  // (PDF.js registers it under the item's fontName once the page renders), falling back to the generic family;
+  // counting characters instead drifts in proportional fonts and pushes highlights to the right.
+  const measureCtx = document.createElement("canvas").getContext("2d");
+  function fracAt(it, styles, a) {
+    if (a <= 0) return 0;
+    if (a >= it.str.length) return 1;
+    try {
+      const generic = (styles[it.fontName] && styles[it.fontName].fontFamily) || "sans-serif";
+      measureCtx.font = `100px "${it.fontName}", ${generic}`;
+      const full = measureCtx.measureText(it.str).width;
+      if (full > 0) return measureCtx.measureText(it.str.slice(0, a)).width / full;
+    } catch { /* fall through */ }
+    return a / it.str.length;
+  }
+
   // Rectangles (as % of the page) covering raw text range [rs, re) on page p.
   async function rectsFor(p, rs, re) {
-    const { items, starts, vp } = await pageContent(p);
+    const { items, starts, styles, vp } = await pageContent(p);
     const out = [];
     for (let k = 0; k < items.length; k++) {
       const it = items[k], st = starts[k], len = it.str.length;
@@ -675,7 +796,8 @@ button { cursor: pointer; }
       const la = Math.max(rs, st) - st, lb = Math.min(re, st + len) - st;
       const t = pdfjsLib.Util.transform(vp.transform, it.transform);
       const fh = Math.hypot(t[2], t[3]) || 10;
-      const x = t[4] + it.width * la / len, w = it.width * (lb - la) / len;
+      const fa = fracAt(it, styles, la), fb = fracAt(it, styles, lb);
+      const x = t[4] + it.width * fa, w = it.width * (fb - fa);
       out.push({ l: x / vp.width * 100, t: (t[5] - fh * 0.88) / vp.height * 100, w: w / vp.width * 100, h: fh * 1.12 / vp.height * 100 });
     }
     return out;
@@ -693,10 +815,14 @@ button { cursor: pointer; }
     const q = state.query;
     if (!list.length) { layer.innerHTML = ""; return; }
     const parts = [];
+    const badges = [];
     for (const i of list) {
-      const h = state.hits[i];
-      for (const r of await rectsFor(p, h.rs, h.re)) parts.push(`<div class="${i === state.active ? "active" : ""}" style="left:${r.l}%;top:${r.t}%;width:${r.w}%;height:${r.h}%"></div>`);
+      const h = state.hits[i], act = i === state.active ? "active" : "";
+      const rects = await rectsFor(p, h.rs, h.re);
+      for (const r of rects) parts.push(`<div class="${act}" style="left:${r.l}%;top:${r.t}%;width:${r.w}%;height:${r.h}%"></div>`);
+      if (i < BADGE_MAX && rects.length) badges.push(`<span class="hl-num ${act}" style="left:${rects[0].l}%;top:${rects[0].t + rects[0].h / 2}%">${i + 1}</span>`);
     }
+    parts.push(...badges);   // badges after highlights so they sit on top
     if (state.query === q) layer.innerHTML = parts.join("");
   }
 
@@ -776,6 +902,8 @@ button { cursor: pointer; }
   });
 
   const pick = () => $("fileInput").click();
+  $("noticeOpen").addEventListener("click", pick);
+  $("noticeClose").addEventListener("click", () => { ls.set("tcs.dismissed", $("notice").dataset.key || ""); $("notice").hidden = true; });
   $("openBtn").addEventListener("click", pick);
   $("openBtn2").addEventListener("click", pick);
   $("fileInput").addEventListener("change", e => { openFile(e.target.files[0]); e.target.value = ""; });
@@ -793,6 +921,8 @@ button { cursor: pointer; }
     } catch { /* storage unavailable: start from the Open PDF card */ }
   })();
   renderResults();
+  applyEditionConfig();
+  loadEditionConfig();
 })();
 </script>
 </body>
