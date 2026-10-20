@@ -16,7 +16,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body { background: var(--ground); color: var(--ink); font-family: Roboto, system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-  header { background: var(--sky); color: var(--cream); padding: 28px clamp(20px, 6vw, 96px) 40px; border-bottom: 3px solid var(--sun); }
+  header { background: var(--sky) url(/header-night.jpg) center bottom / cover no-repeat; color: var(--cream); padding: 28px clamp(20px, 6vw, 96px) 120px; border-bottom: 3px solid var(--sun); }
+  @media (max-width: 700px) { header { background-size: 640px auto; padding-bottom: 96px; } }
   .top { display: flex; align-items: center; gap: 24px; }
   .top nav { margin-left: auto; display: flex; gap: 22px; }
   .top nav a { color: var(--cream); text-decoration: none; font-weight: 500; font-size: 15px; opacity: 0.85; padding: 4px 0; border-bottom: 2px solid transparent; }
