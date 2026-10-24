@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Texas Property Tax Calendar · West Texas Analytics</title>
+<meta name="description" content="Every statutory Texas property tax deadline for any year, with weekend and holiday rollover, Tax Code links and calendar export. A free tool from West Texas Analytics, LLC.">
+<meta name="theme-color" content="#24394A">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky:#24394A; --ink:#1A2A37; --muted:#5E6670; --cream:#FFF6D8; --ground:#FDF4D9; --panel:#FFFBEF;
+    --line:#E7DCC0; --sun:#D98A3D; --soft:#F5EACB; --band-muted:#B7C2CC; --red:#B3261E;
+    --display: Bitter, Georgia, serif; --body: Roboto, system-ui, sans-serif; --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--ground); color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+  a { color: var(--sky); }
+  :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+  /* Band: same as the other WTA tools */
+  .band { background: var(--sky); color: var(--cream); border-bottom: 3px solid var(--sun);
+    padding: 12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .brand { display: grid; gap: 1px; }
+  .crumbs { display: flex; align-items: center; gap: 6px; }
+  .crumbs a { font: 500 10.5px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--band-muted); text-decoration: none; }
+  .crumbs a:hover { color: var(--cream); }
+  .crumbs .sep { color: var(--band-muted); font-size: 11px; }
+  .band h1 { font: 700 20px/1.2 var(--display); margin: 0; }
+  .band > nav { margin-left: auto; display: flex; gap: 18px; }
+  .band > nav a { color: var(--cream); text-decoration: none; font-weight: 500; font-size: 14px; opacity: .9; border-bottom: 2px solid transparent; padding: 3px 0; }
+  .band > nav a:hover { opacity: 1; border-bottom-color: var(--sun); }
+  .band :focus-visible { outline-color: var(--cream); }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 22px max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left)); }
+  .intro { margin: 0 0 18px; color: #3B4A57; max-width: 760px; }
+
+  /* Controls */
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--ground); padding: 10px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 10px 14px; align-items: center; }
+  .year { display: flex; align-items: center; gap: 6px; }
+  .year button { width: 32px; height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; font-size: 16px; cursor: pointer; color: var(--ink); }
+  .year select { height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 0 8px; font: 700 16px var(--display); color: var(--ink); }
+  .search input { width: 100%; height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 0 12px; font: inherit; color: var(--ink); }
+  .search input:focus { border-color: var(--sky); outline: none; box-shadow: 0 0 0 3px var(--soft); }
+  .actions { display: flex; gap: 8px; }
+  .btn { height: 34px; border: 1px solid var(--sky); background: var(--sky); color: var(--cream); border-radius: 8px; padding: 0 12px; font: 500 14px var(--body); cursor: pointer; white-space: nowrap; }
+  .btn.ghost { background: transparent; color: var(--sky); }
+  .chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chips .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 3px 11px; font: 500 13px var(--body); color: var(--ink); cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--sky); border-color: var(--sky); color: var(--cream); }
+  .toggle { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; }
+
+  /* Next-up card */
+  .next { display: none; margin: 14px 0 6px; padding: 12px 16px; border-left: 4px solid var(--sun); background: var(--panel); border-radius: 0 10px 10px 0; }
+  .next.show { display: block; }
+  .next b { font-family: var(--display); }
+
+  /* List */
+  .month { margin-top: 22px; }
+  .month h2 { font: 700 18px/1.2 var(--display); margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--line); display: flex; align-items: baseline; gap: 10px; }
+  .month h2 small { font: 400 13px var(--body); color: var(--muted); }
+  .item { display: grid; grid-template-columns: 88px 1fr; gap: 4px 16px; padding: 12px 4px; border-bottom: 1px solid var(--line); }
+  .item.past { opacity: .55; }
+  .item.upnext { background: var(--soft); box-shadow: inset 4px 0 0 var(--sun); scroll-margin-top: 150px; }
+  .when { font-variant-numeric: tabular-nums; }
+  .when .d { font: 700 22px/1 var(--display); }
+  .when .dow { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .what { min-width: 0; }
+  .what .t { font-weight: 500; }
+  .what .key { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--red); letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); align-items: center; }
+  .tag { border-radius: 4px; padding: 1px 7px; font-size: 12px; font-weight: 500; background: var(--soft); color: var(--ink); }
+  .tag.O { background: #E3EEF5; } .tag.AD { background: #F5E6D3; } .tag.ARB { background: #EDE3F2; } .tag.TU { background: #E2F0E4; } .tag.ST { background: #ECECEC; }
+  .secs a, .secs span { font-family: var(--mono); font-size: 12.5px; }
+  .secs a { text-decoration: none; border-bottom: 1px dotted var(--sky); }
+  .roll { font-size: 13px; color: var(--red); margin-top: 4px; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .empty { padding: 30px 4px; color: var(--muted); }
+
+  .fine { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); max-width: 820px; }
+  .fine p { margin: 0 0 8px; }
+  footer { padding: 18px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); border-top: 1px solid var(--line); font-size: 14px; color: #4A5560; text-align: center; }
+  footer a { color: inherit; }
+
+  @media (max-width: 720px) {
+    .controls { grid-template-columns: auto 1fr; position: static; }
+    .item.upnext { scroll-margin-top: 12px; }
+    .actions { grid-column: 1 / -1; }
+    .actions .btn { flex: 1; }
+    .toggle { margin-left: 0; }
+    .item { grid-template-columns: 64px 1fr; gap: 4px 12px; }
+    .when .d { font-size: 19px; }
+    .band > nav { margin-left: 0; width: 100%; }
+  }
+  @media print {
+    .band > nav, .controls, .next, footer, .fine .noprint { display: none !important; }
+    body { background: #fff; } .band { background: #fff; color: #000; border: 0; padding: 0 0 8px; }
+    .crumbs { display: none; } .item.past { opacity: 1; } .item.upnext { background: none; }
+    .month { break-inside: avoid-page; } .item { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="brand">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="https://westtexasanalytics.com/">WTA</a><span class="sep" aria-hidden="true">›</span><a href="/">Tools</a></nav>
+    <h1>Texas Property Tax Calendar</h1>
+  </div>
+  <nav aria-label="Main">
+    <a href="https://westtexasanalytics.com/">Home</a>
+    <a href="/">Tools</a>
+    <a href="mailto:kerry@wta.llc">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <p class="intro">Every statutory property tax deadline for the year you pick. When a deadline lands on a weekend or legal holiday, the calendar shows the next business day, as Tax Code <a href="/tax-code/#q=Sec.%201.06">§ 1.06</a> allows. Click a section number to read it in the Tax Code Search.</p>
+
+  <section class="controls" aria-label="Calendar options">
+    <div class="year">
+      <button type="button" id="prevYear" aria-label="Previous year">‹</button>
+      <select id="yearSel" aria-label="Tax year"></select>
+      <button type="button" id="nextYear" aria-label="Next year">›</button>
+    </div>
+    <div class="search"><input id="q" type="search" placeholder="Filter: protest, rendition, rate, 41.44…" aria-label="Filter deadlines" autocomplete="off"></div>
+    <div class="actions">
+      <button type="button" class="btn" id="icsBtn" title="Download the deadlines shown as a calendar file (.ics) for Outlook, Google or Apple Calendar">Add to calendar</button>
+      <button type="button" class="btn ghost" id="printBtn">Print</button>
+    </div>
+    <div class="chips" role="group" aria-label="Show deadlines for">
+      <span class="lbl">Show:</span>
+      <button type="button" class="chip" data-aud="all" aria-pressed="true">Everything</button>
+      <button type="button" class="chip" data-aud="O" aria-pressed="false">Property owners</button>
+      <button type="button" class="chip" data-aud="AD" aria-pressed="false">Appraisal district</button>
+      <button type="button" class="chip" data-aud="ARB" aria-pressed="false">Review board</button>
+      <button type="button" class="chip" data-aud="TU" aria-pressed="false">Taxing units</button>
+      <button type="button" class="chip" data-aud="ST" aria-pressed="false">Comptroller</button>
+      <label class="toggle"><input type="checkbox" id="keyOnly"> Key dates only</label>
+    </div>
+  </section>
+
+  <div class="next" id="next" aria-live="polite"></div>
+  <div id="list"></div>
+
+  <section class="fine">
+    <p><b>Source.</b> Deadlines and section citations follow the Texas Comptroller’s <a href="https://comptroller.texas.gov/taxes/property-tax/calendars/deadlines.php" target="_blank" rel="noopener">Property Tax Law Deadlines</a>, descriptions shortened. Dates marked “or as soon as practicable” and dates that move with an event (for example, 30 days after a notice) are explained under the entry. Laws change; confirm with the Tax Code, your appraisal district or your tax office before relying on a date.</p>
+    <p><b>Weekends and holidays.</b> Under § 1.06, an act due on a Saturday, Sunday or legal state or national holiday is timely on the next regular business day. This calendar counts federal holidays and Texas’s fixed state holidays. It does not count optional holidays or local office closures (§ 1.06(b)); check with your local office.</p>
+    <p class="noprint">Not affiliated with the Texas Comptroller of Public Accounts. Made by <a href="https://westtexasanalytics.com/">West Texas Analytics, LLC</a>.</p>
+  </section>
+</main>
+<footer><a href="https://westtexasanalytics.com/">West Texas Analytics, LLC</a> · San Angelo, Texas · <a href="mailto:kerry@wta.llc">kerry@wta.llc</a></footer>
+
+<script>
+/* Deadlines: [month, day, title, audiences, sections, options]
+   day: number, or "last" (last day of month).  options: { end: day (range), roll: false (a status date, not a deadline to act),
+   key: true (highlighted), note: "", years: "even"|"odd" }.  Sections without a code name are Tax Code sections. */
+const D = [
+  [1, 1, "Property values and most exemption qualifications are set as of January 1 (inventories may use September 1 instead)", ["O","AD"], ["11.42(a)","23.01(a)","23.12(f)"], { roll:false, key:true }],
+  [1, 1, "Tax lien attaches to property to secure the year’s taxes, penalties and interest", ["O","TU"], ["32.01(a)"], { roll:false }],
+  [1, 1, "Appraisal district directors begin two-year terms (counties under 75,000)", ["AD"], ["6.03(b)"], { roll:false, years:"even" }],
+  [1, 1, "Appraisal district directors begin staggered four-year terms (counties of 75,000 or more): appointed members in alternating even years, elected members in alternating odd years", ["AD"], ["6.0301(e)"], { roll:false }],
+  [1, 1, "Half of the appraisal review board members begin two-year terms; ARB commissioners begin one-year terms", ["ARB"], ["6.41(d-8)"], { roll:false }],
+  [1, 1, "ARB commissioners (where appointed) send the list of proposed ARB members to the local administrative district judge", ["ARB"], ["6.41(d-7)"]],
+  [1, 1, "Chief appraiser notifies the Comptroller of eligibility to serve", ["AD"], ["6.05(c)"]],
+  [1, 1, "Temporary exemption for disaster-damaged property ends in the first year the property is reappraised under § 25.18", ["O"], ["11.35(k)"], { roll:false }],
+  [1, 2, "Rendition period begins", ["O"], ["22.23(a)"], { roll:false }],
+  [1, 10, "If last year’s tax bill is mailed after this date, its delinquency date is postponed", ["TU","O"], ["31.04(a)"], { roll:false }],
+  [1, 31, "Comptroller certifies preliminary School District Property Value Study findings. School districts and property owners may protest by the 40th day after certification", ["ST","TU"], ["Gov’t Code 403.302(g)","Gov’t Code 403.303(a)"]],
+  [1, 31, "Chief appraiser delivers applications for agricultural designation and for exemptions that require a new application each year", ["AD"], ["11.44(a)","23.43(e)"]],
+  [1, 31, "Installment plan (disabled or 65+ homeowners, disabled veterans, surviving spouses): notice of intent and first installment due, when the delinquency date is Feb. 1", ["O"], ["31.031(a-1)"]],
+  [1, 31, "Disaster-area installment plan: first installment due, when the delinquency date is Feb. 1", ["O"], ["31.032(b)"]],
+  [1, 31, "Appraisal district gives public notice of the capitalization rate for the low- and moderate-income housing exemption", ["AD"], ["11.1825(r)"]],
+  [2, 1, "Dealer’s inventory declarations due: motor vehicles, vessels and outboard motors, heavy equipment, retail manufactured housing", ["O"], ["23.121(f)","23.124(f)","23.1241(f)","23.127(f)"]],
+  [2, 1, "Last year’s taxes become delinquent if paid after this date (bills mailed on or before Jan. 10)", ["O","TU"], ["31.02(a)","31.04(a)"], { key:true }],
+  [2, 1, "Rollback tax and interest for a change of use of 1-d, 1-d-1, timber or restricted-use timber land become delinquent, if the bill was delivered at least 20 days earlier", ["O","TU"], ["23.46(c)","23.55(e)","23.76(e)","23.9807(f)"]],
+  [2, 15, "Tax collector disburses inventory tax escrow funds to taxing units", ["TU"], ["23.122(k)","23.1242(j)","23.125(k)","23.128(j)"]],
+  [2, "last", "Last day to request separate appraisal of an interest in a cooperative housing corporation", ["O"], ["23.19(c)"]],
+  [3, 31, "Second quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
+  [3, 31, "Installment plans: second installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a)","31.031(a-1)","31.032(a)","31.032(b)"]],
+  [3, 31, "Community housing development organizations file their list of property acquired or sold during the past year", ["O"], ["11.182(i)"]],
+  [4, 1, "Local governments file applications with the Comptroller for disabled veteran assistance payments (previous fiscal year)", ["TU"], ["Local Gov’t Code 140.011(e)"]],
+  [4, 1, "Notices of appraised value for single-family residence homesteads", ["AD","O"], ["25.19(a)"], { key:true, note:"Or as soon as practicable after this date." }],
+  [4, 1, "Written notice to homeowners whose homestead exemption was canceled or reduced", ["AD","O"], ["25.193(a)"], { note:"Or as soon as practicable after this date." }],
+  [4, 1, "Chief appraiser tells taxing units the form in which the appraisal roll will be provided", ["AD","TU"], ["26.01(a)"]],
+  [4, 15, "Renditions and property reports due for most property", ["O"], ["22.23(a)","22.23(b)","22.21"], { key:true, note:"The chief appraiser must extend to May 15 on written request." }],
+  [4, 30, "Exemption applications due", ["O"], ["11.43(d)"], { key:true, note:"Some organizations have one year after acquiring property (§§ 11.42(d), 11.43(d)). A homestead acquired after Jan. 1 can qualify for the rest of the year (§ 11.42(f))." }],
+  [4, 30, "Notify the chief appraiser if property no longer qualifies for an exemption that doesn’t require annual application", ["O"], ["11.43(g)"]],
+  [4, 30, "Applications for special appraisal (1-d, 1-d-1 open-space, timber, restricted-use timber, recreational-park-scenic, public access airport), and notices that property no longer qualifies", ["O"], ["23.43(b)","23.54(d)","23.75(d)","23.84(b)","23.94(b)","23.9804(e)"], { key:true }],
+  [4, 30, "Railroad rolling stock reports due", ["O"], ["24.32(e)"]],
+  [4, 30, "Requests for separate listing (land and improvements, standing timber, undivided interests), proportionate taxing of PUD association property, or joint taxation of mineral interests", ["O"], ["25.08(c)","25.09(b)","25.10(c)","25.11(b)","25.12(b)"]],
+  [4, 30, "Chief appraiser certifies an estimate of taxable value to counties, cities and school districts (counties and cities may waive)", ["AD","TU"], ["26.01(e)","26.01(f)","Educ. Code 44.004(g)"]],
+  [4, 30, "Renditions for property regulated by the PUC, Railroad Commission, Surface Transportation Board or FERC", ["O"], ["22.23(d)"], { note:"The chief appraiser must extend to May 15 on written request." }],
+  [4, 30, "Applications for interstate allocation", ["O"], ["21.09(b)"], { note:"The chief appraiser may extend up to 30 days for good cause." }],
+  [5, 1, "Notices of appraised value for all other property", ["AD","O"], ["25.19(a)"], { key:true, note:"Or as soon as practicable after this date." }],
+  [5, 1, "Taxing units may file resolutions to change how the appraisal district is financed", ["TU"], ["6.061(c)"], { end:14, roll:false }],
+  [5, 1, "Chief appraiser publishes notice of protest procedures in a local newspaper", ["AD"], ["41.70(a)","41.70(b)","41.41(b)"], { end:15, roll:false }],
+  [5, 2, "Taxing units begin notifying delinquent taxpayers of the July 1 attorney collection penalty (notice period runs through June 1)", ["TU"], ["33.07(d)"], { roll:false }],
+  [5, 15, "Appraisal review board adopts its hearing procedures (send to the Comptroller within 15 days)", ["ARB"], ["41.01(c)","41.01(d)"]],
+  [5, 15, "Extended rendition deadline, if an extension was requested", ["O"], ["22.23(b)"], { note:"The chief appraiser may add 15 more days for good cause." }],
+  [5, 15, "Chief appraiser submits appraisal records to the review board", ["AD","ARB"], ["25.01(a)","25.22(a)"], { note:"Or as soon as practicable after this date." }],
+  [5, 15, "Protest deadline for most property", ["O"], ["41.44(a)(1)"], { key:true, note:"Or the 30th day after the notice of appraised value was delivered, whichever is later." }],
+  [5, 19, "Chief appraiser determines whether enough taxing units filed resolutions to change the finance method", ["AD"], ["6.061(d)"]],
+  [5, 24, "Chief appraiser notifies taxing units of any change in the finance method", ["AD","TU"], ["6.061(d)"]],
+  [5, 31, "Taxing units file challenges with the appraisal review board", ["TU","ARB"], ["41.04"], { note:"Or 15 days after the records are submitted to the ARB, whichever is later." }],
+  [5, 31, "Installment plans: third installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a)","31.031(a-1)","31.032(a)","31.032(b)"]],
+  [5, 31, "Religious organization denied a § 11.20 exemption amends its charter and files a new application", ["O"], ["11.421(b)"], { note:"Or the 60th day after the denial notice, whichever is later." }],
+  [5, 31, "Taxing units may act to extend the freeport period for aircraft parts up to 730 days", ["TU"], ["11.251(l)"]],
+  [6, 1, "End of the attorney collection penalty notice period that began May 2", ["TU"], ["33.07(d)"]],
+  [6, 14, "Chief appraiser sends the proposed appraisal district budget to the board and taxing units", ["AD","TU"], ["6.06(a)","6.06(i)"], { note:"Unless the district has changed its fiscal year." }],
+  [6, 15, "Chief appraiser acts on late-filed freeport exemption applications", ["AD","O"], ["11.4391(a)"], { note:"Or the 60th day after a § 22.22 notice, if applicable." }],
+  [6, 16, "Appraisal district board may begin passing a resolution to change the finance method (needs unanimous taxing unit approval; period ends before Aug. 15)", ["AD"], ["6.061(a)"], { roll:false }],
+  [6, 30, "Second half of a split payment of last year’s taxes due", ["O"], ["31.03(a)"]],
+  [6, 30, "Third quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
+  [6, 30, "Last day to create a taxing unit that will levy taxes this year", ["TU"], ["26.12(d)"]],
+  [6, 30, "Last day to adopt local option percentage homestead exemptions", ["TU"], ["11.13(n)"], { key:true }],
+  [6, 30, "Private school denied a § 11.21 exemption amends its charter and files a new application", ["O"], ["11.422(a)(1)"], { note:"Or the 60th day after the denial notice, whichever is later." }],
+  [7, 1, "Delinquent taxes reach the full 12 percent penalty", ["O","TU"], ["33.01(a)"], { roll:false, key:true }],
+  [7, 1, "Additional attorney collection penalty may be added to taxes still delinquent (taxing units with a collection contract)", ["O","TU"], ["33.07(a)","33.08(a)"], { roll:false }],
+  [7, 1, "Review and protests of railroad rolling stock appraisals complete; chief appraiser certifies allocated value to the Comptroller", ["AD","ST"], ["24.35(b)","24.36"], { note:"Or as soon as practicable." }],
+  [7, 20, "Appraisal review board approves the appraisal records", ["ARB"], ["41.12(a)"], { key:true, note:"Unless more than 5% of total appraised value is still under protest. In counties of 1 million or more, the board may postpone to Aug. 30 or raise the threshold to 10%." }],
+  [7, 25, "Comptroller certifies the apportionment of railroad rolling stock value to counties", ["ST"], ["24.38","24.40"]],
+  [7, 25, "Chief appraiser certifies the appraisal roll to each taxing unit", ["AD","TU"], ["26.01(a)"], { key:true }],
+  [7, 25, "If the ARB hasn’t approved the records by July 20, chief appraiser certifies an estimate of taxable value to each assessor", ["AD","TU"], ["26.01(a-1)"]],
+  [7, 31, "Installment plans: fourth installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a-1)","31.032(b)"]],
+  [7, 31, "Last day to apply to have inventory appraised as of Sept. 1 next year", ["O"], ["23.12(f)"]],
+  [8, 1, "Assessor submits the appraisal roll and the collector submits the anticipated collection rate to the governing body", ["TU"], ["26.04(b)"], { note:"Or as soon as practicable." }],
+  [8, 7, "Taxing units publicize no-new-revenue and voter-approval rates, fund balances and debt schedules (not school districts, small taxing units or certain water districts)", ["TU"], ["26.04(e)","26.052(b)","Water Code 49.107(g)","Water Code 49.108(f)"], { key:true, note:"Or as soon as practicable." }],
+  [8, 7, "Chief appraiser posts the property tax database notice on the website and publishes it in a local newspaper", ["AD"], ["26.04(e-2)","26.04(e-6)","26.17"], { note:"Or as soon as practicable." }],
+  [8, 14, "Last day for the appraisal district board to pass a resolution changing the finance method, or the number or selection of directors", ["AD"], ["6.061(a)","6.031(a)"]],
+  [8, 15, "Comptroller certifies final School District Property Value Study findings to the commissioner of education", ["ST"], ["Comptroller Rule 9.4317(d)"]],
+  [8, 30, "Appraisal review board approval in counties of 1 million or more, if postponed from July 20", ["ARB"], ["41.12(c)(1)"]],
+  [8, 31, "Deadline tied to waiving penalties and interest when a tax bill wasn’t delivered (conditions apply)", ["TU"], ["33.011(b)(1)"]],
+  [8, 31, "Taxing units file resolutions opposing a change in the finance method or in the number or selection of directors", ["TU"], ["6.061(a)","6.031(a)"]],
+  [8, 31, "Motor vehicle dealers file to opt out of dealer inventory treatment for next year (if eligible)", ["O"], ["23.121(a)(3)(D)(iii)"]],
+  [9, 1, "Inventory may be valued as of this date at the owner’s written option", ["O"], ["23.12(f)"], { roll:false }],
+  [9, 14, "Appraisal district board adopts next year’s budget", ["AD"], ["6.06(b)","6.06(i)"], { key:true, note:"Unless the district has changed its fiscal year." }],
+  [9, 14, "Appraisal district board notifies taxing units in writing of any rejected proposal to change the finance method or directors", ["AD","TU"], ["6.061(a)","6.031(a)"]],
+  [9, 29, "Taxing units adopt this year’s tax rate", ["TU"], ["26.05(a)","26.05(c)"], { key:true, note:"Or the 60th day after receiving the certified roll, whichever is later. A unit that misses it gets the lower of its no-new-revenue rate or last year’s rate and must ratify within 5 days." }],
+  [9, 30, "Fourth quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
+  [10, 1, "Tax bills mailed", ["TU","O"], ["31.01(a)"], { key:true, note:"Or as soon as practicable after this date." }],
+  [11, 30, "First half of a split tax payment due", ["O"], ["31.03(a)"]],
+  [12, 1, "Appraisal office may run a mail survey to verify homestead eligibility", ["AD"], ["11.47(a)"], { end:31, roll:false }],
+  [12, 31, "First quarterly payment on next year’s appraisal district budget due", ["TU"], ["6.06(e)"]],
+  [12, 31, "Last day for taxing units to act to tax goods-in-transit next year", ["TU"], ["11.253(j)"]],
+];
+const AUD = { O:"Property owners", AD:"Appraisal district", ARB:"Review board", TU:"Taxing units", ST:"Comptroller" };
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+/* Holidays counted for § 1.06: federal holidays and Texas's fixed state holidays (Gov't Code 662.003(a)-(b)). */
+function nthDow(y, m, dow, n) { const d = new Date(y, m, 1); const off = (dow - d.getDay() + 7) % 7; return new Date(y, m, 1 + off + (n - 1) * 7); }
+function lastDow(y, m, dow) { const d = new Date(y, m + 1, 0); return new Date(y, m, d.getDate() - ((d.getDay() - dow + 7) % 7)); }
+function holidays(y) {
+  const h = new Map(), add = (d, name) => h.set(key(d), (h.get(key(d)) ? h.get(key(d)) + " / " : "") + name);
+  add(new Date(y,0,1), "New Year’s Day");
+  add(nthDow(y,0,1,3), "Martin Luther King Jr. Day");
+  add(new Date(y,0,19), "Confederate Heroes Day");
+  add(nthDow(y,1,1,3), "Presidents’ Day");
+  add(new Date(y,2,2), "Texas Independence Day");
+  add(new Date(y,3,21), "San Jacinto Day");
+  add(lastDow(y,4,1), "Memorial Day");
+  add(new Date(y,5,19), "Juneteenth / Emancipation Day");
+  add(new Date(y,6,4), "Independence Day");
+  add(new Date(y,7,27), "Lyndon Baines Johnson Day");
+  add(nthDow(y,8,1,1), "Labor Day");
+  add(nthDow(y,9,1,2), "Columbus Day");
+  add(new Date(y,10,11), "Veterans Day");
+  const tg = nthDow(y,10,4,4); add(tg, "Thanksgiving Day");
+  add(new Date(y,10,tg.getDate()+1), "Day after Thanksgiving");
+  add(new Date(y,11,24), "Christmas Eve");
+  add(new Date(y,11,25), "Christmas Day");
+  add(new Date(y,11,26), "Day after Christmas");
+  return h;
+}
+const key = d => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+function rollForward(d, hol) {
+  const reasons = []; let x = new Date(d);
+  while (x.getDay() === 0 || x.getDay() === 6 || hol.has(key(x))) {
+    reasons.push(x.getDay() === 0 || x.getDay() === 6 ? (x.getDay() === 6 ? "Saturday" : "Sunday") : hol.get(key(x)));
+    x = new Date(x.getFullYear(), x.getMonth(), x.getDate() + 1);
+  }
+  return { date: x, reasons };
+}
+const fmt = (d, o = { month:"short", day:"numeric" }) => d.toLocaleDateString("en-US", o);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+/* Build the dated list for a year */
+function buildYear(y) {
+  const hol = new Map([...holidays(y), ...holidays(y + 1)]);   // a Dec. 31 deadline can roll into next year
+  return D.filter(r => !r[5]?.years || (r[5].years === "even") === (y % 2 === 0)).map((r, i) => {
+    const [m, day, title, aud, secs, o = {}] = r;
+    const dd = day === "last" ? new Date(y, m, 0).getDate() : day;
+    const stat = new Date(y, m - 1, dd);
+    const end = o.end ? new Date(y, m - 1, o.end) : null;
+    const rolled = o.roll === false || end ? { date: stat, reasons: [] } : rollForward(stat, hol);
+    return { i, stat, end, eff: rolled.date, reasons: rolled.reasons, title, aud, secs, key: !!o.key, note: o.note || "" };
+  }).sort((a, b) => a.eff - b.eff || a.i - b.i);
+}
+
+/* Section links into the Tax Code Search (Tax Code sections only) */
+function secHtml(s) {
+  if (/[A-Za-z]/.test(s.replace(/\([a-z0-9-]+\)/gi, ""))) return `<span>${esc(s)}</span>`;
+  const base = s.replace(/\(.*$/, "");
+  return `<a href="/tax-code/#q=${encodeURIComponent("Sec. " + base)}" title="Open § ${esc(base)} in the Tax Code Search">§ ${esc(s)}</a>`;
+}
+
+/* State */
+const $ = id => document.getElementById(id);
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const today = new Date(); today.setHours(0,0,0,0);
+const thisYear = today.getFullYear();
+let year = +(new URLSearchParams(location.search).get("year")) || thisYear;
+let aud = store.get("ptc.aud") || "all";
+let keyOnly = store.get("ptc.key") === "1";
+let current = [];
+
+const sel = $("yearSel");
+for (let y = thisYear - 2; y <= thisYear + 3; y++) sel.add(new Option(y, y));
+function setYear(y) {
+  year = Math.min(thisYear + 3, Math.max(thisYear - 2, y));
+  sel.value = year;
+  $("prevYear").disabled = year <= thisYear - 2; $("nextYear").disabled = year >= thisYear + 3;
+  const u = new URL(location.href); if (year === thisYear) u.searchParams.delete("year"); else u.searchParams.set("year", year);
+  history.replaceState(null, "", u);
+  render();
+}
+
+function matches(e, q) {
+  if (aud !== "all" && !e.aud.includes(aud)) return false;
+  if (keyOnly && !e.key) return false;
+  if (!q) return true;
+  const hay = (e.title + " " + e.note + " " + e.secs.join(" ") + " " + e.aud.map(a => AUD[a]).join(" ")).toLowerCase();
+  return q.toLowerCase().split(/\s+/).every(w => hay.includes(w.replace(/^§/, "")));
+}
+
+function render() {
+  const q = $("q").value.trim();
+  current = buildYear(year).filter(e => matches(e, q));
+  const list = $("list");
+  if (!current.length) { list.innerHTML = `<p class="empty">No deadlines match. Try another word or audience.</p>`; $("next").className = "next"; return; }
+  const upcoming = current.find(e => (e.end || e.eff) >= today);
+  let html = "", lastM = -1;
+  for (const e of current) {
+    const m = e.eff.getFullYear() * 12 + e.eff.getMonth();   // a Dec. 31 deadline can roll into next January
+    if (m !== lastM) {
+      if (lastM !== -1) html += `</section>`;
+      const n = current.filter(x => x.eff.getFullYear() * 12 + x.eff.getMonth() === m).length;
+      html += `<section class="month" aria-labelledby="m${m}"><h2 id="m${m}">${MONTHS[e.eff.getMonth()]} ${e.eff.getFullYear()} <small>${n} deadline${n === 1 ? "" : "s"}</small></h2>`;
+      lastM = m;
+    }
+    const past = (e.end || e.eff) < today, up = e === upcoming;
+    const rng = e.end ? `<span class="dow">through ${fmt(e.end)}</span>` : `<span class="dow">${DOW[e.eff.getDay()]}</span>`;
+    const roll = e.reasons.length ? `<div class="roll">Statutory date ${fmt(e.stat, { weekday:"short", month:"short", day:"numeric" })} falls on ${esc(e.reasons.join(", then "))}; due the next business day.</div>` : "";
+    html += `<article class="item${past ? " past" : ""}${up ? " upnext" : ""}">
+      <div class="when"><span class="d">${fmt(e.eff)}</span>${rng}</div>
+      <div class="what"><span class="t">${esc(e.title)}</span>${e.key ? `<span class="key">Key date</span>` : ""}
+        ${roll}${e.note ? `<div class="note">${esc(e.note)}</div>` : ""}
+        <div class="meta">${e.aud.map(a => `<span class="tag ${a}">${AUD[a]}</span>`).join("")}<span class="secs">${e.secs.map(secHtml).join(", ")}</span></div>
+      </div></article>`;
+  }
+  list.innerHTML = html + `</section>`;
+  const nx = $("next");
+  if (year === thisYear && upcoming) {
+    const days = Math.round((upcoming.eff - today) / 864e5);
+    nx.innerHTML = `<b>Next up:</b> ${esc(upcoming.title)} · ${fmt(upcoming.eff, { weekday:"long", month:"long", day:"numeric" })}${days > 0 ? ` (in ${days} day${days === 1 ? "" : "s"})` : days === 0 ? " (today)" : ""}`;
+    nx.className = "next show";
+  } else nx.className = "next";
+}
+
+/* Calendar export (.ics), all-day events on the effective date */
+function ics() {
+  const pad = n => String(n).padStart(2, "0"), dstr = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  // Fold content lines at 75 octets (RFC 5545), counting UTF-8 bytes so characters like ’ and ★ aren't split.
+  const fold = s => { let out = "", n = 0; for (const ch of s) { const b = new TextEncoder().encode(ch).length; if (n + b > 74) { out += "\r\n "; n = 1; } out += ch; n += b; } return out; };
+  const txt = s => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//West Texas Analytics//Texas Property Tax Calendar//EN","CALSCALE:GREGORIAN","X-WR-CALNAME:Texas Property Tax " + year];
+  for (const e of current) {
+    const endD = new Date((e.end || e.eff)); endD.setDate(endD.getDate() + 1);
+    const desc = [e.note, e.reasons.length ? `Statutory date ${fmt(e.stat)}; rolled to next business day (§ 1.06).` : "", "For: " + e.aud.map(a => AUD[a]).join(", "), "Tax Code: " + e.secs.join(", "), "https://tools.westtexasanalytics.com/tax-calendar/"].filter(Boolean).join("\n");
+    lines.push("BEGIN:VEVENT", `UID:ptc-${year}-${e.i}@tools.westtexasanalytics.com`, `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${dstr(e.eff)}`, `DTEND;VALUE=DATE:${dstr(endD)}`,
+      fold("SUMMARY:" + txt((e.key ? "★ " : "") + e.title)), fold("DESCRIPTION:" + txt(desc)), "TRANSP:TRANSPARENT", "END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
+  const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `texas-property-tax-${year}${aud !== "all" ? "-" + AUD[aud].toLowerCase().replace(/\s+/g, "-") : ""}.ics` });
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* Wire up */
+sel.addEventListener("change", () => setYear(+sel.value));
+$("prevYear").addEventListener("click", () => setYear(year - 1));
+$("nextYear").addEventListener("click", () => setYear(year + 1));
+let t; $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 120); });
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+  aud = c.dataset.aud; store.set("ptc.aud", aud);
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === c))); render();
+}));
+document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.aud === aud)));
+$("keyOnly").checked = keyOnly;
+$("keyOnly").addEventListener("change", e => { keyOnly = e.target.checked; store.set("ptc.key", keyOnly ? "1" : "0"); render(); });
+$("icsBtn").addEventListener("click", ics);
+$("printBtn").addEventListener("click", () => window.print());
+setYear(year);
+// Opening this year's calendar: start at the next upcoming deadline instead of January.
+if (year === thisYear && !$("q").value) { const up = document.querySelector(".item.upnext"); if (up) up.scrollIntoView({ block: "start" }); }
+</script>
+</body>
+</html>
