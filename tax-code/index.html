@@ -793,6 +793,31 @@ button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0
       const x = t[4] + it.width * fa, w = it.width * (fb - fa);
       out.push({ l: x / vp.width * 100, t: (t[5] - fh * 0.88) / vp.height * 100, w: w / vp.width * 100, h: fh * 1.12 / vp.height * 100 });
     }
+    return mergeRects(out, vp.width / vp.height);
+  }
+
+  // One match can span several PDF text pieces (e.g. "Open-" + "Space Land", or a bold run next to plain text).
+  // Join pieces that sit on the same line and touch or nearly touch into a single box, so each match gets one
+  // clean outline per line. Rects are in % of page width/height; `aspect` converts heights into width units.
+  function mergeRects(rects, aspect) {
+    if (rects.length < 2) return rects;
+    const out = [];
+    for (const r of rects) {
+      const prev = out[out.length - 1];
+      if (prev) {
+        const pMid = prev.t + prev.h / 2, rMid = r.t + r.h / 2;
+        const sameLine = Math.abs(pMid - rMid) < Math.max(prev.h, r.h) * 0.5;
+        const gap = r.l - (prev.l + prev.w);                       // % of page width
+        const lineH = Math.max(prev.h, r.h) / aspect;              // line height in % of page width
+        if (sameLine && gap > -lineH && gap < lineH * 0.9) {
+          const l = Math.min(prev.l, r.l), t = Math.min(prev.t, r.t);
+          const rgt = Math.max(prev.l + prev.w, r.l + r.w), bot = Math.max(prev.t + prev.h, r.t + r.h);
+          Object.assign(prev, { l, t, w: rgt - l, h: bot - t });
+          continue;
+        }
+      }
+      out.push({ ...r });
+    }
     return out;
   }
 
