@@ -16,8 +16,24 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body { background: var(--ground); color: var(--ink); font-family: Roboto, system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-  header { background: var(--sky) url(/header-night.jpg) center bottom / cover no-repeat; color: var(--cream); padding: 28px clamp(20px, 6vw, 96px) 120px; border-bottom: 3px solid var(--sun); }
-  @media (max-width: 700px) { header { background-size: 640px auto; padding-bottom: 96px; } }
+  header { position: relative; overflow: hidden; background: var(--sky); color: var(--cream); padding: 28px clamp(20px, 6vw, 96px) 130px; border-bottom: 3px solid var(--sun); }
+  header > *:not(svg) { position: relative; z-index: 1; }
+  header h1, header p { text-shadow: 0 1px 12px rgba(20, 28, 40, .35); }
+  @media (max-width: 700px) { header { padding-bottom: 100px; } }
+
+  /* Sunrise over the Twin Buttes: night warms to dawn, stars fade, the sun rises in the saddle. Plays once (~9 s) and holds. */
+  .scene { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; --dur: 9s; overflow: visible; }
+  .dawn  { opacity: 0; animation: fadeIn var(--dur) ease-in-out forwards; }
+  .glow  { opacity: 0; animation: fadeIn var(--dur) cubic-bezier(.5,0,.3,1) forwards; }
+  .stars { animation: fadeOut var(--dur) ease-in forwards; }
+  .sunwrap { transform: translateY(78px); animation: rise var(--dur) cubic-bezier(.45,0,.25,1) forwards; }
+  .buttes { fill: #1A2A37; animation: warm var(--dur) ease-in-out forwards; }
+  .rim { opacity: 0; animation: fadeIn var(--dur) ease-in forwards; }
+  @keyframes fadeIn  { 0%, 10% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: .12; } }
+  @keyframes rise    { 0%, 25% { transform: translateY(78px); } 100% { transform: translateY(-14px); } }
+  @keyframes warm    { 0%, 20% { fill: #1A2A37; } 100% { fill: #2B222D; } }
+  @media (prefers-reduced-motion: reduce) { .dawn, .glow, .stars, .sunwrap, .buttes, .rim { animation-duration: 1ms; } }
   .top { display: flex; align-items: center; gap: 24px; }
   .top nav { margin-left: auto; display: flex; gap: 22px; }
   .top nav a { color: var(--cream); text-decoration: none; font-weight: 500; font-size: 15px; opacity: 0.85; padding: 4px 0; border-bottom: 2px solid transparent; }
@@ -38,6 +54,36 @@
 </head>
 <body>
 <header>
+  <svg class="scene" viewBox="0 0 1280 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="dawnSky" x1="0" y1="0" x2="0" y2="474" gradientUnits="userSpaceOnUse">
+        <stop offset="0"   stop-color="#2A3E5A"/>
+        <stop offset=".42" stop-color="#55567A"/>
+        <stop offset=".70" stop-color="#B8786E"/>
+        <stop offset=".87" stop-color="#EDA463"/>
+        <stop offset="1"   stop-color="#F8D592"/>
+      </linearGradient>
+      <radialGradient id="sunGlow" cx="640" cy="474" r="430" gradientUnits="userSpaceOnUse" gradientTransform="translate(640 474) scale(1.7 1) translate(-640 -474)">
+        <stop offset="0"   stop-color="#FFE7B0" stop-opacity=".95"/>
+        <stop offset=".25" stop-color="#FFC983" stop-opacity=".55"/>
+        <stop offset="1"   stop-color="#FFB070" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <rect y="-700" width="1280" height="1200" fill="#24394A"/>
+    <rect y="-700" class="dawn" width="1280" height="1200" fill="url(#dawnSky)"/>
+    <g class="stars" id="stars"></g>
+    <rect y="-700" class="glow" width="1280" height="1200" fill="url(#sunGlow)"/>
+    <g class="sunwrap">
+      <circle cx="640" cy="474" r="64" fill="#FFE2A0" opacity=".35" filter="url(#soft)"/>
+      <circle cx="640" cy="474" r="44" fill="#FFF1CC"/>
+    </g>
+    <g transform="translate(0 360)">
+      <path class="rim" d="M0 122 C80 121 140 118 180 112 C220 100 245 60 262 46 L272 40 L300 39 L330 38 L342 44 C365 62 400 92 450 104 C500 112 560 114 640 114 C720 114 800 112 850 104 C900 92 950 58 985 36 L995 30 L1030 29 L1065 28 L1078 34 C1100 50 1130 74 1170 90 C1200 100 1240 104 1280 108"
+            fill="none" stroke="#FFC48A" stroke-width="3" filter="url(#soft)"/>
+      <path class="buttes" d="M0 122 C80 121 140 118 180 112 C220 100 245 60 262 46 L272 40 L300 39 L330 38 L342 44 C365 62 400 92 450 104 C500 112 560 114 640 114 C720 114 800 112 850 104 C900 92 950 58 985 36 L995 30 L1030 29 L1065 28 L1078 34 C1100 50 1130 74 1170 90 C1200 100 1240 104 1280 108 L1280 140 L0 140 Z"/>
+    </g>
+  </svg>
   <div class="top">
     <a class="mark" href="https://westtexasanalytics.com" title="West Texas Analytics home">WTA</a>
     <nav aria-label="Main">
@@ -58,5 +104,25 @@
 <footer>
   <a href="https://westtexasanalytics.com">West Texas Analytics, LLC</a> · San Angelo, Texas · <a href="mailto:kerry@wta.llc">kerry@wta.llc</a>
 </footer>
+<script>
+  // Stars for the sunrise header (warm white, denser high in the sky).
+  (function () {
+    let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    let out = "";
+    for (let i = 0; i < 170; i++) {
+      const y = Math.pow(rnd(), 1.6) * 400, x = rnd() * 1280;
+      const r = 0.6 + Math.pow(rnd(), 3) * 1.3, a = (0.25 + Math.pow(rnd(), 2) * 0.7) * (1 - Math.pow(y / 400, 2) * 0.6);
+      out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(2)}" fill="#F6F1E7" opacity="${a.toFixed(2)}"/>`;
+    }
+    document.getElementById("stars").innerHTML = out;
+    // Narrow screens: frame just the buttes so both stay in view.
+    const svg = document.querySelector(".scene"), mq = matchMedia("(max-width: 700px)");
+    const fit = () => {
+      svg.setAttribute("viewBox", mq.matches ? "200 0 880 500" : "0 0 1280 500");
+      svg.setAttribute("preserveAspectRatio", mq.matches ? "xMidYMax meet" : "xMidYMax slice");
+    };
+    fit(); mq.addEventListener("change", fit);
+  })();
+</script>
 </body>
 </html>
