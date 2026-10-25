@@ -477,11 +477,20 @@ function drawWheel() {
   svgEl("circle", { cx, cy, r: R, fill: "none", stroke: "#24394A", "stroke-width": 3 }, svg);
   for (let m = 0; m < 12; m++) { const [x1, y1] = pt(ang(new Date(y, m, 1)) - half, R - 6), [x2, y2] = pt(ang(new Date(y, m, 1)) - half, R); svgEl("line", { x1, y1, x2, y2, stroke: "#24394A", "stroke-width": 1.5 }, svg); }
 
-  // Milestones: key dates among the deadlines shown; if a filter leaves none, the deadlines themselves
+  // Every deadline gets a mark. Key dates are labeled notches; if a filter leaves no key dates, the deadlines shown are labeled instead.
+  // The rest are small dots on the rim (deadlines a few days apart share one dot), with details on hover.
   const inYear = current.filter(e => e.eff.getFullYear() === y || doy(e.eff) < days + 7);
   let ms = inYear.filter(e => e.key); const keyOnlyShown = ms.length > 0;
   if (!ms.length) ms = inYear.slice(0, 20);
   ms.forEach((e, n) => e._n = n + 1);
+  const minor = inYear.filter(e => !ms.includes(e)), groups = [];
+  for (const e of minor) { const g = groups.at(-1); if (g && (e.eff - g.at(-1).eff) / 864e5 <= 3) g.push(e); else groups.push([e]); }
+  for (const g of groups) {
+    const a = ang(g[0].eff) - (g[0].eff.getMonth() === 11 && g[0].eff.getDate() >= 29 ? half * 6 : 0), [dx, dy] = pt(a, R), past = g.every(e => (e.end || e.eff) < today) && y === thisYear;
+    const dot = svgEl("g", {}, svg);
+    svgEl("circle", { cx: dx, cy: dy, r: narrow ? 7 : 4 + Math.min(g.length - 1, 3) * 0.8, fill: past ? "#E3DAC4" : "#FFFBEF", stroke: "#24394A", "stroke-width": 1.5 }, dot);
+    mark(dot, g, () => showInList(g[0].i));
+  }
   for (const e of ms) {
     const a = ang(e.eff), [x1, y1] = pt(a, R - 8), [x2, y2] = pt(a, R + 10), past = e.eff < today;
     svgEl("line", { x1, y1, x2, y2, stroke: "#24394A", "stroke-width": 3 }, svg);
@@ -501,7 +510,7 @@ function drawWheel() {
   keyList.innerHTML = narrow ? ms.map(e => `<li class="${e.eff < today && y === thisYear ? "past" : ""}" data-i="${e.i}"><span class="n">${e._n}</span><span class="d">${fmt(e.eff)}</span><span>${esc(shortFor(e))}</span></li>`).join("") : "";
   keyList.querySelectorAll("li").forEach(li => li.addEventListener("click", () => showInList(+li.dataset.i)));
   $("wheelNote").textContent = !current.length ? "No deadlines match the filters." :
-    keyOnlyShown ? `Showing the ${ms.length} key date${ms.length === 1 ? "" : "s"} of ${current.length} deadline${current.length === 1 ? "" : "s"} that match. Click a wedge or a date to see it in the list.` :
+    keyOnlyShown ? `${ms.length} key date${ms.length === 1 ? "" : "s"} labeled; the small dots on the rim are the other ${current.length - ms.length} deadline${current.length - ms.length === 1 ? "" : "s"} (hover for details). Click a wedge, notch or dot to see it in the list.` :
     `Showing ${ms.length} deadline${ms.length === 1 ? "" : "s"}. Click a date to see it in the list.`;
 }
 
