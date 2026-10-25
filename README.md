@@ -42,3 +42,7 @@ The live site updates a minute or two after the commit.
 - `CNAME`: custom domain for GitHub Pages (`tools.westtexasanalytics.com`). DNS is a CNAME record `tools` → `kerrymcclain.github.io` at GoDaddy.
 - `.nojekyll`: serve the files as-is.
 - `favicon-32.png`, `apple-touch-icon.png`: Twin Buttes site icon.
+
+## Tests
+
+Browser tests for every tool live in [`tests/`](tests/README.md). Run `python tests/run_all.py` after any change (add `--pdf path/to/96-297-25.pdf` to include the real-PDF test).
