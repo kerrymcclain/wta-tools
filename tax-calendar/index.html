@@ -91,6 +91,28 @@
   footer { padding: 18px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); border-top: 1px solid var(--line); font-size: 14px; color: #4A5560; text-align: center; }
   footer a { color: inherit; }
 
+  /* View switch and wheel */
+  .views { display: inline-flex; border: 1px solid var(--sky); border-radius: 8px; overflow: hidden; height: 34px; }
+  .views button { border: 0; background: transparent; color: var(--sky); font: 500 14px var(--body); padding: 0 12px; cursor: pointer; }
+  .views button[aria-pressed="true"] { background: var(--sky); color: var(--cream); }
+  .wheelwrap { margin-top: 10px; }
+  .wheelwrap svg { display: block; width: 100%; max-width: 860px; margin: 0 auto; }
+  .wheelwrap svg text { font-family: var(--body); }
+  .wheelwrap svg :not(.mk) { pointer-events: none; }
+  .wheelwrap svg .mk, .wheelwrap svg .mk * { pointer-events: all; cursor: pointer; }
+  .wheelwrap svg .mk:hover, .wheelwrap svg .mk:focus { filter: brightness(1.1); outline: none; }
+  .wheelnote { text-align: center; font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  .wheelkey { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+  .wheelkey li { display: grid; grid-template-columns: 26px 64px 1fr; gap: 8px; align-items: baseline; font-size: 14px; padding: 6px 4px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .wheelkey .n { font: 700 12px/22px var(--body); width: 22px; height: 22px; border-radius: 50%; background: var(--sun); color: #fff; text-align: center; }
+  .wheelkey .d { font-weight: 700; font-family: var(--display); }
+  .wheelkey li.past { opacity: .55; }
+  #tip { position: fixed; z-index: 30; pointer-events: none; max-width: 320px; background: var(--sky); color: var(--cream); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4; box-shadow: 0 4px 18px rgba(0,0,0,.25); display: none; }
+  #tip b { font-family: var(--display); }
+  #tip .row { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.18); }
+  .item.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0%, 30% { background: #FFE2B8; } 100% { background: transparent; } }
+
   @media (max-width: 720px) {
     .controls { grid-template-columns: auto 1fr; position: static; }
     .item.upnext { scroll-margin-top: 12px; }
@@ -102,7 +124,8 @@
     .band > nav { margin-left: 0; width: 100%; }
   }
   @media print {
-    .band > nav, .controls, .next, footer, .fine .noprint { display: none !important; }
+    .band > nav, .controls, .next, footer, .fine .noprint, .wheelnote { display: none !important; }
+    .wheelwrap svg { max-width: 100%; }
     body { background: #fff; } .band { background: #fff; color: #000; border: 0; padding: 0 0 8px; }
     .crumbs { display: none; } .item.past { opacity: 1; } .item.upnext { background: none; }
     .month { break-inside: avoid-page; } .item { break-inside: avoid; }
@@ -133,6 +156,7 @@
     </div>
     <div class="search"><input id="q" type="search" placeholder="Filter: protest, rendition, rate, 41.44…" aria-label="Filter deadlines" autocomplete="off"></div>
     <div class="actions">
+      <div class="views" role="group" aria-label="View"><button type="button" data-view="list" aria-pressed="true">List</button><button type="button" data-view="wheel" aria-pressed="false">Wheel</button></div>
       <button type="button" class="btn" id="icsBtn" title="Download the deadlines shown as a calendar file (.ics) for Outlook, Google or Apple Calendar">Add to calendar</button>
       <button type="button" class="btn ghost" id="printBtn">Print</button>
     </div>
@@ -150,6 +174,12 @@
 
   <div class="next" id="next" aria-live="polite"></div>
   <div id="list"></div>
+  <section class="wheelwrap" id="wheelWrap" hidden aria-label="Tax year wheel">
+    <svg id="wheel" viewBox="-90 -10 820 660" role="img" aria-labelledby="wheelTitle"><title id="wheelTitle">Tax year wheel: phases of the year with key deadlines around the rim</title></svg>
+    <ol class="wheelkey" id="wheelKey" hidden></ol>
+    <p class="wheelnote" id="wheelNote"></p>
+  </section>
+  <div id="tip" role="tooltip"></div>
 
   <section class="fine">
     <p><b>Source.</b> Deadlines and section citations follow the Texas Comptroller’s <a href="https://comptroller.texas.gov/taxes/property-tax/calendars/deadlines.php" target="_blank" rel="noopener">Property Tax Law Deadlines</a>, descriptions shortened. Dates marked “or as soon as practicable” and dates that move with an event (for example, 30 days after a notice) are explained under the entry. Laws change; confirm with the Tax Code, your appraisal district or your tax office before relying on a date.</p>
@@ -346,7 +376,7 @@ function render() {
   const q = $("q").value.trim();
   current = buildYear(year).filter(e => matches(e, q));
   const list = $("list");
-  if (!current.length) { list.innerHTML = `<p class="empty">No deadlines match. Try another word or audience.</p>`; $("next").className = "next"; return; }
+  if (!current.length) { list.innerHTML = `<p class="empty">No deadlines match. Try another word or audience.</p>`; $("next").className = "next"; drawWheel(); return; }
   const upcoming = current.find(e => (e.end || e.eff) >= today);
   let html = "", lastM = -1;
   for (const e of current) {
@@ -360,7 +390,7 @@ function render() {
     const past = (e.end || e.eff) < today, up = e === upcoming;
     const rng = e.end ? `<span class="dow">through ${fmt(e.end)}</span>` : `<span class="dow">${DOW[e.eff.getDay()]}</span>`;
     const roll = e.reasons.length ? `<div class="roll">Statutory date ${fmt(e.stat, { weekday:"short", month:"short", day:"numeric" })} falls on ${esc(e.reasons.join(", then "))}; due the next business day.</div>` : "";
-    html += `<article class="item${past ? " past" : ""}${up ? " upnext" : ""}">
+    html += `<article class="item${past ? " past" : ""}${up ? " upnext" : ""}" data-i="${e.i}">
       <div class="when"><span class="d">${fmt(e.eff)}</span>${rng}</div>
       <div class="what"><span class="t">${esc(e.title)}</span>${e.key ? `<span class="key">Key date</span>` : ""}
         ${roll}${e.note ? `<div class="note">${esc(e.note)}</div>` : ""}
@@ -374,6 +404,131 @@ function render() {
     nx.innerHTML = `<b>Next up:</b> ${esc(upcoming.title)} · ${fmt(upcoming.eff, { weekday:"long", month:"long", day:"numeric" })}${days > 0 ? ` (in ${days} day${days === 1 ? "" : "s"})` : days === 0 ? " (today)" : ""}`;
     nx.className = "next show";
   } else nx.className = "next";
+  drawWheel();
+}
+
+/* ---------- Wheel view: the year's phases as wedges, key deadlines as notches on the rim ---------- */
+const PHASES = [ // [name, start [m, d], end [m, d], color, color when current]
+  ["Appraisal", [1,1], [3,31], "#DCE7EF", "#B9CEDD"],
+  ["Notices & protests", [4,1], [5,31], "#F6E2CC", "#EDC79F"],
+  ["ARB hearings", [6,1], [7,20], "#E9DFF0", "#D3BFE2"],
+  ["Roll & rates", [7,21], [9,30], "#DDEEDF", "#B9DCBF"],
+  ["Billing & collection", [10,1], [12,31], "#ECE8DD", "#D6CDB6"],
+];
+const SHORT = [ // short wheel labels for key dates: [words in the title, label]
+  ["Property values and most", "Values set"], ["become delinquent if paid", "Taxes delinquent"], ["Notices of appraised value for single-family", "Homestead notices"],
+  ["Renditions and property reports due", "Renditions due"], ["Exemption applications due", "Exemption apps"], ["Applications for special appraisal", "Ag/open-space apps"],
+  ["Notices of appraised value for all other", "Other notices"], ["Protest deadline", "Protests due"], ["local option percentage homestead", "Local homestead exemptions"],
+  ["full 12 percent", "12% penalty"], ["review board approves the appraisal", "ARB approves"], ["certifies the appraisal roll", "Roll certified"],
+  ["publicize no-new-revenue", "Rates published"], ["board adopts next year", "CAD budget"], ["adopt this year’s tax rate", "Rates adopted"], ["Tax bills mailed", "Bills mailed"],
+];
+const shortFor = e => { const s = SHORT.find(([n]) => e.title.includes(n)); if (s) return s[1]; const t = e.title.split(/[,(:;]/)[0]; return t.length > 34 ? t.slice(0, 32).replace(/\s+\S*$/, "") + "…" : t; };
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); parent && parent.appendChild(n); return n; };
+let view = new URLSearchParams(location.search).get("view") || store.get("ptc.view") || "list";
+
+/* tooltip shared by the wheel's marks */
+const tip = $("tip");
+function showTip(ev, items) {
+  tip.innerHTML = items.map((e, i) => `<div class="${i ? "row" : ""}"><b>${fmt(e.eff, { weekday:"short", month:"short", day:"numeric" })}</b>${e.end ? " – " + fmt(e.end) : ""} · ${e.aud.map(a => AUD[a]).join(", ")}<br>${esc(e.title)}${e.reasons.length ? `<br><i>Moved from ${fmt(e.stat)} (${esc(e.reasons[0])})</i>` : ""}</div>`).join("") + `<div class="row" style="opacity:.75">Click to see it in the list</div>`;
+  tip.style.display = "block"; moveTip(ev);
+}
+function moveTip(ev) { tip.style.left = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8) + "px"; tip.style.top = Math.min(ev.clientY + 14, innerHeight - tip.offsetHeight - 8) + "px"; }
+const hideTip = () => tip.style.display = "none";
+function mark(node, items, onClick) {
+  node.classList.add("mk"); node.setAttribute("tabindex", "0"); node.setAttribute("role", "button");
+  node.setAttribute("aria-label", items.map(e => `${fmt(e.eff)}: ${e.title}`).join("; "));
+  node.addEventListener("mouseenter", e => showTip(e, items)); node.addEventListener("mousemove", moveTip); node.addEventListener("mouseleave", hideTip);
+  node.addEventListener("focus", () => { const r = node.getBoundingClientRect(); showTip({ clientX: r.right, clientY: r.bottom }, items); }); node.addEventListener("blur", hideTip);
+  node.addEventListener("click", onClick); node.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } });
+}
+function showInList(i) {
+  hideTip(); setView("list");
+  const a = document.querySelector(`.item[data-i="${i}"]`);
+  if (a) { a.scrollIntoView({ block: "center" }); a.classList.remove("flash"); void a.offsetWidth; a.classList.add("flash"); }
+}
+
+function drawWheel() {
+  const svg = $("wheel"), keyList = $("wheelKey");
+  [...svg.querySelectorAll(":scope > :not(title)")].forEach(n => n.remove());
+  if (view !== "wheel") return;
+  const y = year, cx = 320, cy = 320, R = 200, days = (y % 4 === 0 ? 366 : 365);
+  const doy = d => Math.round((d - new Date(d.getFullYear(), 0, 1)) / 864e5) + (d.getFullYear() - y) * days;
+  const ang = d => (doy(d) + 0.5) / days * 2 * Math.PI - Math.PI / 2;
+  const pt = (a, r) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  const wedge = (a1, a2, r) => { const [x1, y1] = pt(a1, r), [x2, y2] = pt(a2, r); return `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${a2 - a1 > Math.PI ? 1 : 0} 1 ${x2},${y2} Z`; };
+  const narrow = $("wheelWrap").clientWidth < 640;
+  const tA = ang(today), half = Math.PI / days;
+  svg.setAttribute("viewBox", narrow ? "72 72 496 496" : "-90 -10 820 660");   // phones: no outside labels, so crop to the wheel
+
+  // Phase wedges (click one to jump to its first deadline in the list)
+  for (const [name, s, e, c, cNow] of PHASES) {
+    const a1 = ang(new Date(y, s[0] - 1, s[1])) - half, a2 = ang(new Date(y, e[0] - 1, e[1])) + half, now = y === thisYear && tA >= a1 && tA <= a2;
+    const w = svgEl("path", { d: wedge(a1, a2, R), fill: now ? cNow : c, stroke: "#FFFBEF", "stroke-width": 4 }, svg);
+    const first = current.find(x => x.eff >= new Date(y, s[0] - 1, s[1]) && x.eff <= new Date(y, e[0] - 1, e[1]));
+    if (first) { w.classList.add("mk"); w.setAttribute("tabindex", "0"); w.setAttribute("role", "button"); w.setAttribute("aria-label", `${name}: show in list`);
+      w.addEventListener("click", () => showInList(first.i)); w.addEventListener("keydown", ev => { if (ev.key === "Enter") showInList(first.i); }); }
+    const am = (a1 + a2) / 2, [tx, ty] = pt(am, 128), words = name.split(" "), fs = narrow ? 22 : 15;
+    const lines = words.length > 1 ? [words.slice(0, -1).join(" "), words.at(-1)] : [name];
+    lines.forEach((ln, i) => svgEl("text", { x: tx, y: ty + (i - (lines.length - 1) / 2) * (fs + 3) + 4, "text-anchor": "middle", "font-size": fs, "font-weight": 700, fill: "#1A2A37", "font-family": "Bitter, Georgia, serif" }, svg).textContent = ln);
+    if (!narrow) svgEl("text", { x: tx, y: ty + (lines.length > 1 ? 32 : 22), "text-anchor": "middle", "font-size": 11.5, fill: "#5E6670" }, svg).textContent = `${MONTHS[s[0] - 1].slice(0, 3)} ${s[1]} – ${MONTHS[e[0] - 1].slice(0, 3)} ${e[1]}`;
+    if (now) svgEl("text", { x: tx, y: ty - (lines.length > 1 ? 30 : 20) - (narrow ? 6 : 0), "text-anchor": "middle", "font-size": narrow ? 15 : 11, "font-weight": 700, "letter-spacing": ".08em", fill: "#B3261E" }, svg).textContent = "NOW";
+  }
+  svgEl("circle", { cx, cy, r: R, fill: "none", stroke: "#24394A", "stroke-width": 3 }, svg);
+  for (let m = 0; m < 12; m++) { const [x1, y1] = pt(ang(new Date(y, m, 1)) - half, R - 6), [x2, y2] = pt(ang(new Date(y, m, 1)) - half, R); svgEl("line", { x1, y1, x2, y2, stroke: "#24394A", "stroke-width": 1.5 }, svg); }
+
+  // Milestones: key dates among the deadlines shown; if a filter leaves none, the deadlines themselves
+  const inYear = current.filter(e => e.eff.getFullYear() === y || doy(e.eff) < days + 7);
+  let ms = inYear.filter(e => e.key); const keyOnlyShown = ms.length > 0;
+  if (!ms.length) ms = inYear.slice(0, 20);
+  ms.forEach((e, n) => e._n = n + 1);
+  for (const e of ms) {
+    const a = ang(e.eff), [x1, y1] = pt(a, R - 8), [x2, y2] = pt(a, R + 10), past = e.eff < today;
+    svgEl("line", { x1, y1, x2, y2, stroke: "#24394A", "stroke-width": 3 }, svg);
+    const [mx, my] = pt(a, narrow ? R + 22 : R + 10);
+    const g = svgEl("g", {}, svg);
+    svgEl("circle", { cx: mx, cy: my, r: narrow ? 15 : 5.5, fill: past && y === thisYear ? "#C9BFA6" : "#D98A3D", stroke: "#24394A", "stroke-width": 1.5 }, g);
+    if (narrow) svgEl("text", { x: mx, y: my + 6, "text-anchor": "middle", "font-size": 16, "font-weight": 700, fill: "#fff" }, g).textContent = e._n;
+    mark(g, [e], () => showInList(e.i));
+  }
+  if (!narrow) placeLabels(svg, ms, ang, pt, R + 40, R + 14);
+
+  // Today hand
+  if (y === thisYear) { const [hx, hy] = pt(tA, R - 4); svgEl("line", { x1: cx, y1: cy, x2: hx, y2: hy, stroke: "#B3261E", "stroke-width": 3, "stroke-linecap": "round" }, svg); svgEl("circle", { cx, cy, r: 7, fill: "#B3261E" }, svg); }
+
+  // Phones: numbered key below the wheel instead of labels around it
+  keyList.hidden = !narrow;
+  keyList.innerHTML = narrow ? ms.map(e => `<li class="${e.eff < today && y === thisYear ? "past" : ""}" data-i="${e.i}"><span class="n">${e._n}</span><span class="d">${fmt(e.eff)}</span><span>${esc(shortFor(e))}</span></li>`).join("") : "";
+  keyList.querySelectorAll("li").forEach(li => li.addEventListener("click", () => showInList(+li.dataset.i)));
+  $("wheelNote").textContent = !current.length ? "No deadlines match the filters." :
+    keyOnlyShown ? `Showing the ${ms.length} key date${ms.length === 1 ? "" : "s"} of ${current.length} deadline${current.length === 1 ? "" : "s"} that match. Click a wedge or a date to see it in the list.` :
+    `Showing ${ms.length} deadline${ms.length === 1 ? "" : "s"}. Click a date to see it in the list.`;
+}
+
+// Outside labels: left and right columns, each label at least 16px below the one above, with a leader to its notch.
+function placeLabels(svg, items, ang, pt, rLabel, rFrom) {
+  const cy = 320, cx = 320, sides = { L: [], R: [] };
+  for (const e of items) { const a = ang(e.eff), [, y] = pt(a, rLabel); sides[Math.cos(a) >= -0.02 ? "R" : "L"].push({ e, a, y }); }
+  for (const [side, arr] of Object.entries(sides)) {
+    arr.sort((p, q) => p.y - q.y);
+    for (let i = 1; i < arr.length; i++) if (arr[i].y < arr[i - 1].y + 16) arr[i].y = arr[i - 1].y + 16;
+    const over = arr.length ? arr.at(-1).y - (cy + rLabel + 20) : 0;
+    if (over > 0) for (let i = arr.length - 1; i >= 0; i--) { arr[i].y -= over; if (i && arr[i - 1].y > arr[i].y - 16) arr[i - 1].y = arr[i].y - 16; }
+    for (const p of arr) {
+      const dy = Math.max(-rLabel, Math.min(rLabel, p.y - cy)), dx = Math.sqrt(rLabel * rLabel - dy * dy) + 8, x = cx + (side === "R" ? dx : -dx), [x0, y0] = pt(p.a, rFrom);
+      svgEl("polyline", { points: `${x0},${y0} ${x - (side === "R" ? 6 : -6)},${p.y} ${x - (side === "R" ? 2 : -2)},${p.y}`, fill: "none", stroke: "#1A2A37", "stroke-opacity": .35 }, svg);
+      const t = svgEl("text", { x, y: p.y + 4, "text-anchor": side === "R" ? "start" : "end", "font-size": 12, "font-weight": 700, fill: p.e.eff < today && year === thisYear ? "#8C8471" : "#1A2A37" }, svg);
+      t.textContent = `${shortFor(p.e)} · ${fmt(p.e.eff)}`;
+    }
+  }
+}
+
+function setView(v) {
+  view = v === "wheel" ? "wheel" : "list"; store.set("ptc.view", view);
+  document.querySelectorAll(".views button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  $("list").hidden = view !== "list"; $("wheelWrap").hidden = view !== "wheel";
+  const u = new URL(location.href); if (view === "wheel") u.searchParams.set("view", "wheel"); else u.searchParams.delete("view"); history.replaceState(null, "", u);
+  drawWheel();
 }
 
 /* Calendar export (.ics), all-day events on the effective date */
@@ -411,9 +566,12 @@ $("keyOnly").checked = keyOnly;
 $("keyOnly").addEventListener("change", e => { keyOnly = e.target.checked; store.set("ptc.key", keyOnly ? "1" : "0"); render(); });
 $("icsBtn").addEventListener("click", ics);
 $("printBtn").addEventListener("click", () => window.print());
+document.querySelectorAll(".views button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawWheel, 150); });
 setYear(year);
+setView(view);
 // Opening this year's calendar: start at the next upcoming deadline instead of January.
-if (year === thisYear && !$("q").value) { const up = document.querySelector(".item.upnext"); if (up) up.scrollIntoView({ block: "start" }); }
+if (view === "list" && year === thisYear && !$("q").value) { const up = document.querySelector(".item.upnext"); if (up) up.scrollIntoView({ block: "start" }); }
 </script>
 </body>
 </html>
