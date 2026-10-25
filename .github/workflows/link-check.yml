@@ -1,0 +1,52 @@
+# Weekly link check for tools.westtexasanalytics.com and westtexasanalytics.com.
+# Opens (or updates) a GitHub issue labeled "link-check" when something breaks,
+# and closes it automatically once everything passes again.
+name: Link check
+
+on:
+  schedule:
+    - cron: "17 12 * * 1"   # Mondays 12:17 UTC (7:17 a.m. Central in summer, 6:17 in winter)
+  workflow_dispatch: {}      # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: wta-tools }
+      - uses: actions/checkout@v4
+        with: { repository: kerrymcclain/wta-site, path: wta-site }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install
+        run: |
+          pip install playwright requests pypdf
+          python -m playwright install --with-deps chromium
+      - name: Check links
+        id: check
+        continue-on-error: true
+        run: python wta-tools/tests/check_links.py wta-tools wta-site --report report.md
+      - name: Summary
+        if: always()
+        run: cat report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Open or update the issue
+        if: steps.check.outcome == 'failure'
+        env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+        run: |
+          gh label create link-check --color D98A3D --description "Weekly link check" --force
+          n=$(gh issue list --label link-check --state open --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body-file report.md
+          else gh issue create --title "Broken links on the WTA sites" --label link-check --body-file report.md; fi
+          exit 1
+      - name: Close the issue once fixed
+        if: steps.check.outcome == 'success'
+        env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+        run: |
+          for n in $(gh issue list --label link-check --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "All links check out again ($(date -u +%F))."
+          done
