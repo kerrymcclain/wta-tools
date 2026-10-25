@@ -41,13 +41,16 @@
   .mark { font-family: Bitter, Georgia, serif; font-weight: 700; font-size: 20px; color: var(--cream); text-decoration: none; letter-spacing: -0.02em; }
   h1 { font-family: Bitter, Georgia, serif; font-weight: 700; font-size: clamp(30px, 5vw, 44px); margin: 36px 0 6px; letter-spacing: -0.02em; }
   header p { margin: 0; opacity: 0.85; }
-  main { flex: 1; padding: 32px clamp(20px, 6vw, 96px) 48px; max-width: 960px; width: 100%; }
-  .tool { display: block; text-decoration: none; color: var(--ink); background: #fff; border: 1px solid #E7DCC0; border-radius: 10px; padding: 20px 22px; max-width: 560px; }
+  main { flex: 1; padding: 32px clamp(20px, 6vw, 96px) 48px; width: 100%; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 1000px; }
+  .tool { display: flex; flex-direction: column; text-decoration: none; color: var(--ink); background: #fff; border: 1px solid #E7DCC0; border-radius: 10px; padding: 20px 22px; }
+  .tool .who { font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: #6B7580; margin: 0 0 6px; }
+  .tool span { margin-top: auto; padding-top: 12px; }
   .tool:hover, .tool:focus-visible { border-color: var(--sky); }
   .tool:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
   .tool h2 { font-family: Bitter, Georgia, serif; font-size: 21px; margin: 0 0 6px; }
   .tool p { margin: 0; line-height: 1.5; color: #3B4A57; }
-  .tool span { display: inline-block; margin-top: 12px; font-weight: 500; color: var(--sky); }
+  .tool span { display: inline-block; font-weight: 500; color: var(--sky); }
   footer { padding: 20px clamp(20px, 6vw, 96px); font-size: 14px; color: #4A5560; border-top: 1px solid #E7DCC0; }
   footer a { color: inherit; }
 </style>
@@ -96,11 +99,26 @@
   <p>Free tools from West Texas Analytics, LLC</p>
 </header>
 <main>
-  <a class="tool" href="/tax-code/">
-    <h2>Property Tax Code Search</h2>
-    <p>Search every page of the Texas Property Tax Code, see each match in context, and jump straight to it in the PDF.</p>
-    <span>Open the tool ›</span>
-  </a>
+  <div class="grid">
+    <a class="tool" href="/tax-code/">
+      <p class="who">Reference</p>
+      <h2>Property Tax Code Search</h2>
+      <p>Search every page of the Texas Property Tax Code, see each match in context, and jump straight to it in the PDF.</p>
+      <span>Open the tool ›</span>
+    </a>
+    <a class="tool" href="/tax-calendar/">
+      <p class="who">Deadlines</p>
+      <h2>Texas Property Tax Calendar</h2>
+      <p>Every statutory deadline for any year, moved to the next business day when it lands on a weekend or holiday. Filter by who it applies to and add it to your calendar.</p>
+      <span>Open the tool ›</span>
+    </a>
+    <a class="tool" href="/categories/">
+      <p class="who">Appraisal districts</p>
+      <h2>State Property Categories</h2>
+      <p>Look up any state property category code, or describe a property to find where it belongs, with the Comptroller’s examples and edge cases.</p>
+      <span>Open the tool ›</span>
+    </a>
+  </div>
 </main>
 <footer>
   <a href="https://westtexasanalytics.com">West Texas Analytics, LLC</a> · San Angelo, Texas · <a href="mailto:kerry@wta.llc">kerry@wta.llc</a>
