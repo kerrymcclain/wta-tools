@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>State Property Categories · West Texas Analytics</title>
+<meta name="description" content="Look up Texas state property category codes (A, B, C1, D1, F1, J3, XV…) with plain-English descriptions, examples and edge cases. A free tool from West Texas Analytics, LLC.">
+<meta name="theme-color" content="#24394A">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky:#24394A; --ink:#1A2A37; --muted:#5E6670; --cream:#FFF6D8; --ground:#FDF4D9; --panel:#FFFBEF;
+    --line:#E7DCC0; --sun:#D98A3D; --soft:#F5EACB; --band-muted:#B7C2CC; --red:#B3261E;
+    --display: Bitter, Georgia, serif; --body: Roboto, system-ui, sans-serif; --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--ground); color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+  a { color: var(--sky); }
+  :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+  .band { background: var(--sky); color: var(--cream); border-bottom: 3px solid var(--sun);
+    padding: 12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .brand { display: grid; gap: 1px; }
+  .crumbs { display: flex; align-items: center; gap: 6px; }
+  .crumbs a { font: 500 10.5px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--band-muted); text-decoration: none; }
+  .crumbs a:hover { color: var(--cream); }
+  .crumbs .sep { color: var(--band-muted); font-size: 11px; }
+  .band h1 { font: 700 20px/1.2 var(--display); margin: 0; }
+  .band > nav { margin-left: auto; display: flex; gap: 18px; }
+  .band > nav a { color: var(--cream); text-decoration: none; font-weight: 500; font-size: 14px; opacity: .9; border-bottom: 2px solid transparent; padding: 3px 0; }
+  .band > nav a:hover { opacity: 1; border-bottom-color: var(--sun); }
+  .band :focus-visible { outline-color: var(--cream); }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 22px max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left)); }
+  .intro { margin: 0 0 16px; color: #3B4A57; max-width: 780px; }
+
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--ground); padding: 10px 0 12px; border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .search input { width: 100%; height: 40px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 0 14px; font: inherit; font-size: 16px; color: var(--ink); }
+  .search input:focus { border-color: var(--sky); outline: none; box-shadow: 0 0 0 3px var(--soft); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chips .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 3px 11px; font: 500 13px var(--body); color: var(--ink); cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--sky); border-color: var(--sky); color: var(--cream); }
+  .count { margin-left: auto; font-size: 13px; color: var(--muted); }
+
+  /* Quick index of codes */
+  .index { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 6px; }
+  .index a { font: 700 13px/1 var(--mono); text-decoration: none; color: var(--sky); border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 7px 8px; min-width: 38px; text-align: center; }
+  .index a:hover { border-color: var(--sky); }
+  .index a.dim { opacity: .3; pointer-events: none; }
+
+  .cat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-top: 14px; overflow: hidden; scroll-margin-top: 130px; }
+  .cat:target, .cat.flash { box-shadow: 0 0 0 3px var(--sun); }
+  .cat > header { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; padding: 16px 18px 10px; align-items: start; }
+  .code { font: 700 22px/1 var(--mono); color: var(--cream); background: var(--sky); border-radius: 8px; padding: 10px 0; min-width: 62px; text-align: center; grid-row: span 2; }
+  .cat h2 { font: 700 18px/1.25 var(--display); margin: 2px 0 0; }
+  .kind { font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .body { padding: 0 18px 16px 96px; }
+  .body p { margin: 0 0 10px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+  .cols h3, .qa h3, .subs h3 { font: 700 13px/1.3 var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 8px 0 4px; }
+  .cols ul { margin: 0; padding-left: 18px; }
+  .cols li { margin: 2px 0; }
+  .subs table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .subs td { padding: 5px 8px 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .subs td:first-child { font: 700 13px var(--mono); white-space: nowrap; width: 1%; padding-right: 14px; }
+  .subs td.sec { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; width: 1%; }
+  .qa details { border-top: 1px solid var(--line); padding: 8px 0; }
+  .qa summary { cursor: pointer; font-weight: 500; list-style-position: outside; }
+  .qa details p { margin: 6px 0 0; color: #3B4A57; }
+  mark { background: #FFE58F; color: inherit; border-radius: 2px; }
+  a.xref { font-family: var(--mono); font-weight: 700; font-size: 13px; text-decoration: none; border-bottom: 1px dotted var(--sky); }
+  .empty { padding: 30px 4px; color: var(--muted); }
+
+  .fine { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); max-width: 820px; }
+  .fine p { margin: 0 0 8px; }
+  footer { padding: 18px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); border-top: 1px solid var(--line); font-size: 14px; color: #4A5560; text-align: center; }
+  footer a { color: inherit; }
+
+  @media (max-width: 720px) {
+    .controls { position: static; }
+    .band > nav { margin-left: 0; width: 100%; }
+    .body { padding: 0 16px 14px; }
+    .cat > header { padding: 14px 16px 8px; }
+    .code { font-size: 18px; min-width: 52px; padding: 8px 0; }
+    .cols { grid-template-columns: 1fr; }
+    .cat { scroll-margin-top: 12px; }
+  }
+  @media print { .band > nav, .controls, .index, footer { display: none !important; } body { background: #fff; } .cat { break-inside: avoid; } .qa details { display: block; } }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="brand">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="https://westtexasanalytics.com/">WTA</a><span class="sep" aria-hidden="true">›</span><a href="/">Tools</a></nav>
+    <h1>State Property Categories</h1>
+  </div>
+  <nav aria-label="Main">
+    <a href="https://westtexasanalytics.com/">Home</a>
+    <a href="/">Tools</a>
+    <a href="mailto:kerry@wta.llc">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <p class="intro">The state property categories appraisal districts use when they report values to the Comptroller for the School District Property Value Study. Search a code or describe the property (“mobile home on rented land”, “wind turbine”, “warehouse”) to find where it belongs.</p>
+
+  <section class="controls" aria-label="Find a category">
+    <div class="search"><input id="q" type="search" placeholder="Search a code or describe the property…" aria-label="Search categories" autocomplete="off"></div>
+    <div class="chips" role="group" aria-label="Show">
+      <span class="lbl">Show:</span>
+      <button type="button" class="chip" data-kind="all" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-kind="Real property" aria-pressed="false">Real property</button>
+      <button type="button" class="chip" data-kind="Personal property" aria-pressed="false">Personal property</button>
+      <button type="button" class="chip" data-kind="Inventory" aria-pressed="false">Inventory</button>
+      <button type="button" class="chip" data-kind="Exempt" aria-pressed="false">Exempt</button>
+      <span class="count" id="count"></span>
+    </div>
+  </section>
+
+  <nav class="index" id="index" aria-label="Jump to a category"></nav>
+  <div id="list"></div>
+
+  <section class="fine">
+    <p><b>Source.</b> Texas Comptroller, <a href="https://comptroller.texas.gov/taxes/property-tax/docs/96-313.pdf" target="_blank" rel="noopener"><i>Property Classification Guide</i></a> (Publication 96-313, March 2026), summarized. The guide classifies property for reporting to the Comptroller; it doesn’t decide whether property is taxable or qualifies for special appraisal. Some districts use their own local sub-codes (for example A1, A2), which must map to a valid state category before submitting EARS. Questions about a specific property go to the Comptroller’s Property Tax Assistance Division (800-252-9121, press 1).</p>
+    <p>Not affiliated with the Texas Comptroller of Public Accounts. Made by <a href="https://westtexasanalytics.com/">West Texas Analytics, LLC</a>.</p>
+  </section>
+</main>
+<footer><a href="https://westtexasanalytics.com/">West Texas Analytics, LLC</a> · San Angelo, Texas · <a href="mailto:kerry@wta.llc">kerry@wta.llc</a></footer>
+
+<script>
+/* Categories from the Comptroller's Property Classification Guide (96-313, March 2026), summarized.
+   In text, {D1} becomes a link to that category and [§ 11.14] a link into the Tax Code Search. */
+const C = [
+ { code:"A", title:"Single-family residential", kind:"Real property",
+   about:"Single-family homes and the land they sit on, in town or out. Use decides the category, not acreage: even a large tract is A when its use is residential (unless the land could qualify for productivity value; see {E}).",
+   inc:["Single-family homes","Townhouses, condominiums and row houses","Owner-occupied duplexes with a homestead exemption","A vacant lot used with the home as part of the homestead (combined account)","Mobile homes on land owned by the same person","A partially built house on its lot","A house on land the owner doesn’t own"],
+   exc:["Homes on land classified {D1} or {E}: those go in {E}","Builder or developer homes held for sale that meet the inventory test: {O}","Non-owner-occupied duplexes, triplexes and fourplexes: {B}"],
+   qa:[["A house on a 40-acre farm qualified for productivity value; the owner claims 3 acres as homestead. Is it A?","No. The house and its 3 homestead acres are {E}; the rest of the farm is {D1} if it qualifies."],
+       ["A home burned down before January 1 and the lot is cleared. How is it classified?","With the improvements gone, the lot’s use is a building site: {C1}."],
+       ["A rural subdivision has one house among undeveloped lots. A or E?","It follows the lots: if the vacant lots are {C1}, the house and land are A; if the lots are {E}, the house is E too."]] },
+ { code:"B", title:"Multifamily residential", kind:"Real property",
+   about:"Residential buildings with two or more units under one owner.",
+   inc:["Apartment complexes","Duplexes that aren’t owner-occupied","All triplexes and fourplexes, even if the owner lives in a unit","Apartments above street-level shops, if listed separately","Apartment complexes with a small amount of retail or office space","Multifamily housing exempt under [§ 11.1825] (fully or partly)"],
+   exc:["Hotels and motels, even with high turnover or monthly rates: {F1}","Owner-occupied duplexes with a homestead exemption: {A}","Condominiums and townhomes: {A}","Builder inventory that meets the test: {O}","A full ground floor of retail or office space: split that part out as {F1}"],
+   qa:[["A three-story building has an office and three apartments on the street level and apartments above. Which category?","Classify by predominant use by value: multifamily, so B."]] },
+ { code:"C1", title:"Vacant lots and tracts", kind:"Real property",
+   about:"Vacant land best suited as a building site, without the potential to qualify for productivity value. No minimum or maximum size. Usually described by subdivision lot and block, abstract or section.",
+   inc:["Lots awaiting construction or in some stage of development","Residential, recreational, commercial and industrial building sites","A prepared site with utilities, curbs and street access (until a home is built)","Lots with only nominal improvements, where the lot would be worth at least as much without them","A separate-account vacant lot next to a home"],
+   exc:["Land used for grazing or farming that qualifies as open-space: {D1}; land with that potential that doesn’t qualify: {E}","Lots held by a builder that meet the inventory test: {O}","A lot with a partially built house: {A}","A lot used with an adjacent business: {F1}"],
+   qa:[["50 rural acres used to graze cattle are split into ten 5-acre tracts. Are these vacant lots?","No. The use is agricultural: {D1} if it qualifies as open-space land, or {E} if it no longer qualifies but still has the potential."]] },
+ { code:"C2", title:"Colonia lots and land tracts", kind:"Real property",
+   about:"Only colonia lots: border-region developments without basic services such as drinking water, sewage treatment and paved roads, which Local Government Code chapter 22 prohibits selling. The Comptroller accepts C2 only from counties in the Attorney General’s Border Colonia Geographic Database.",
+   inc:["Colonia lots in counties authorized to have colonias"],
+   exc:["A vacant lot that recently sold: not a colonia (they can’t be sold); most likely {C1}","Local district codes like “C2” or “C3” used for other purposes: map them to a valid state category before submitting EARS"],
+   qa:[] },
+ { code:"D1", title:"Qualified open-space land", kind:"Real property",
+   about:"All acreage qualified for productivity valuation under Texas Constitution article VIII, sections 1-d or 1-d-1, and Tax Code chapter 23 (subchapters C, D, E and H), any size. Districts must report each agricultural or timber subclass.",
+   inc:["Fences and earthwork such as earthen dams, contouring and trenching (part of the land)","Qualified land under barns and other farm or ranch buildings","Surface land over a mineral lease, when the surface is in agricultural use"],
+   exc:["Barns, sheds, silos and other farm and ranch improvements: {D2}","Homes and the non-qualifying land tied to them: {E}"],
+   subsTitle:"Land subclasses", subs:[["","Irrigated cropland"],["","Dry land cropland"],["","Barren/wasteland"],["","Orchards"],["","Improved pasture"],["","Native pasture"],["","Temporary quarantined land"],["","Timber at productivity"],["","Timberland at 1978 market value"],["","Timberland at restricted use"],["","Transition to timber"],["","Wildlife management"],["","Other agricultural land, as defined in [§ 23.51](2)"]],
+   qa:[["A farmer owns a 10-acre tract with four barns, a 225-acre wheat and cotton farm, and 2 acres with his home. How is each classified?","The 225 acres and the 10 acres are D1 (with subclasses). The barns are {D2}. The 2 homestead acres and the house are {E}."]] },
+ { code:"D2", title:"Farm and ranch improvements on qualified open-space land", kind:"Real property",
+   about:"Improvements other than homes on land reported as {D1}: barns, sheds, silos, garages and other buildings used for farming or ranching.",
+   inc:["Barns, sheds, silos and garages used in the agricultural operation"],
+   exc:["Residences, including ranch-hand housing, and their land: {E}","Hunting cabins or a lodge rented to day hunters, and their land: {E}"],
+   qa:[["A 1,000-acre ranch runs cattle, provides ranch-hand homes on 5 acres, and rents hunting cabins and a lodge on 10 acres. How is it split?","The 985 acres of cattle land (including land under the barns) are {D1}; the barns and sheds are D2; the 5 acres with ranch-hand homes and the 10 acres with cabins and lodge are {E}."]] },
+ { code:"E", title:"Rural land not qualified for open-space appraisal, and improvements", kind:"Real property",
+   about:"Rural land that isn’t qualified for productivity value, and the improvements on it, including homes. Any size. If rural land doesn’t fit another category, or could qualify for productivity value, it goes here.",
+   inc:["Homes on farm or ranch land and the land tied to them","Rural acreage held for future development or sale with no farming or ranching","Land split off a larger tract for residential use","Mobile homes on rural land owned by the same person","Ranch-hand housing and hunting cabins or lodges"],
+   exc:["Qualified open-space land, including land under farm buildings: {D1}","Barns, sheds and silos on qualified land: {D2}","Rural land used for commercial, industrial or inventory purposes: classify by that use"],
+   qa:[["A 1,000-acre tract bought to develop into ranchettes isn’t qualified for productivity value and hasn’t been subdivided. Which category?","E: it isn’t open-space land and doesn’t fit another category."],
+       ["A home sits on 200 rural acres, 8 claimed as homestead; the rest is held for sale with no ag use. Which category?","All of it, house and 200 acres, is E. The homestead acreage doesn’t change the classification."]] },
+ { code:"F1", title:"Commercial real property", kind:"Real property",
+   about:"Land and improvements of businesses that sell goods or services to the public. Report land and improvement value together.",
+   inc:["Stores, shopping centers, office buildings and restaurants","Hotels and motels, including suites rented by the month","Gas stations, parking garages and lots, auto dealers and repair shops","Banks, credit unions, finance and insurance companies","Clinics, nursing homes and hospitals","Marinas, bowling alleys and golf courses","Mobile home park land (the homes themselves are {M1})","Time-share condominium complexes run as a business","Warehouses that receive goods from several manufacturers or distributors for wholesale or retail sale","A lot used with an adjacent business","A store owned by a utility but run as an ordinary business"],
+   exc:["The business’s personal property: {L1}","Warehouses that are part of a manufacturing process: {F2}","Apartments: {B}"],
+   qa:[["A discount chain’s warehouse holds goods from many manufacturers for its stores. F1?","Yes. It isn’t part of a manufacturing process, so it’s commercial."]] },
+ { code:"F2", title:"Industrial and manufacturing real property", kind:"Real property",
+   about:"Land and improvements of businesses that add value to a product by developing, manufacturing, fabricating or processing it. Includes fixed equipment that would damage the structure if removed.",
+   inc:["Cotton gins, grain elevators and processing plants","Paper mills, steel mills, refineries, cement and chemical plants","Canning companies and clothing manufacturers","Data centers (their equipment is {L2})","Warehouses that store materials for, or finished goods from, a manufacturer","Wind farms and generation plants inside ERCOT","Support systems built into a plant (compressed air, steam, dehumidification)","Oil field equipment storage yards (land and improvements)"],
+   exc:["Extra company land not used in the operation: classify by its own use (often {E})","Movable equipment and inventory: {L2}","Generation plants outside ERCOT: {J}"],
+   qa:[["A paper mill and its facilities sit on 50 acres of a 350-acre tract. Is all of it F2?","No. Only the 50 acres used for the mill; the other 300 vacant acres are {E} if not qualified open-space land."],
+       ["Where do wind turbines go?","F2, unless owned and operated by an electric utility serving Texas outside ERCOT; then {J}."]] },
+ { code:"G1", title:"Oil and gas", kind:"Real property",
+   about:"The taxable value of producing and non-producing oil and gas interests, plus fixed equipment used to produce them (unless exempt under [§ 11.146]).",
+   inc:["Oil and gas mineral interests","Equipment fixed to the property and used in production"],
+   exc:["Surface land: classify by its use (often {D1})","Tanks and oil after field processing: {L2}","Drilling rigs: {L2}"],
+   qa:[["An oil company leases 8,000 acres of a 20,000-acre ranch and strikes oil. What’s G1?","The mineral interest in the 8,000 acres is G1; the 20,000 surface acres are {D1}."]] },
+ { code:"G2", title:"Other minerals", kind:"Real property",
+   about:"Minerals other than oil and gas, such as uranium, lignite and other substances defined as minerals, plus fixed production equipment.",
+   inc:["Uranium, lignite and coal interests","Fixed equipment used to produce them"], exc:["Limestone, sand, caliche and gravel (not minerals): {G3}"], qa:[] },
+ { code:"G3", title:"Other subsurface interests in land", kind:"Real property",
+   about:"Interests in subsurface land that aren’t defined as minerals, including mines and quarries.",
+   inc:["Limestone, sand, caliche and gravel","Mines and quarries","Fixed equipment used to produce them"], exc:["Oil and gas: {G1}","Defined minerals such as uranium or lignite: {G2}"], qa:[] },
+ { code:"H", title:"Personal vehicles not used for business", kind:"Personal property",
+   about:"Cars, motorcycles and light trucks not used to produce income, taxed only where a taxing unit has acted to tax them under [§ 11.14].",
+   inc:["Privately owned vehicles subject to local-option taxation"],
+   exc:["Vehicles used to produce income, such as delivery vans: {L1}","Exempt non-income-producing vehicles on the roll: {XV}"],
+   qa:[["A restaurant’s five delivery vans: H?","No. They produce income, so {L1}."]] },
+ { code:"J", title:"Utilities", kind:"Real property",
+   about:"Real and personal property of utility companies and co-ops, which usually serve customers through permanent physical connections. Includes construction work in progress for the utility. Most electric generation is {F2} and {L2} since restructuring, but transmission and distribution are J, and so are generation plants of utilities serving Texas outside ERCOT.",
+   inc:["Utility offices, warehouses, garages and yards needed for operations","Railroad right-of-way owned by the railroad","Transmission lines, even from a plant inside ERCOT"],
+   exc:["Utility property not used in operations, such as a retail store: classify by use (e.g. {F1})","Rail cars owned by others: {L1} or {L2}","Drilling rigs owned by a pipeline company: {L2}"],
+   subsTitle:"Utility subcategories", subs:[["J1","Water systems"],["J2","Gas distribution systems"],["J3","Electric companies and electric co-ops"],["J4","Telephone companies and telephone co-ops"],["J5","Railroads"],["J6","Pipelines"],["J7","Cable companies"],["J8","Other"],["J9","Railroad rolling stock (county only)"]],
+   qa:[["A railroad owns 10 acres of right-of-way through a 100-acre ranch it doesn’t own. What’s J?","Only the railroad’s 10 acres."]] },
+ { code:"L1", title:"Commercial personal property", kind:"Personal property",
+   about:"Personal property of businesses that sell goods or services to the public.",
+   inc:["Inventory, supplies, furniture, fixtures and equipment of stores and offices","Vehicles used to produce income","Boats, aircraft and RVs owned by a commercial business (e.g. a company jet)","Inventory and equipment of a well service company","Hotel and motel personal property","Heavy equipment inventory that doesn’t qualify for special appraisal"],
+   exc:["The business’s real property: {F1}","Drilling rigs: {L2}","A manufacturer’s distribution warehouse inventory: {L2}"], qa:[] },
+ { code:"L2", title:"Industrial and manufacturing personal property", kind:"Personal property",
+   about:"Personal property of businesses that add value to a product by developing, manufacturing, processing or storing it.",
+   inc:["Manufacturing machinery and equipment, computers and tools","Raw materials, goods in process and finished goods","Drilling rigs","Barges, commercial watercraft, trucks and heavy equipment of industrial firms","Data center equipment","Oil and tanks after field processing","Equipment of a gas processing plant other than fixed equipment"],
+   exc:["Industrial real property and fixed equipment: {F2}","Personal property of a commercial business: {L1}"], qa:[] },
+ { code:"M1", title:"Mobile homes on someone else’s land", kind:"Personal property",
+   about:"Mobile homes on land owned by someone other than the mobile home’s owner. An exception to classifying by use: even a home lived in goes here when the land has a different owner. Also taxable travel trailers ([§ 11.14](b)) on rented land.",
+   inc:["Homes in a mobile home park with leased spaces (the park land is {F1})","Mobile homes on rented or leased lots"],
+   exc:["A mobile home on land the same person owns: one account, {A} or {E}"], qa:[] },
+ { code:"M2", title:"Other personal property (boats, travel trailers, personal aircraft)", kind:"Personal property",
+   about:"Taxable non-income-producing boats, travel trailers and personal aircraft owned by individuals. These are exempt under [§ 11.14] unless a taxing unit acts to tax them; the Comptroller treats M2 as totally exempt in the school value study.",
+   inc:["An individual’s taxable boat or travel trailer","Personal aircraft owned by an individual"],
+   exc:["The same property used to produce income: {L1} or {L2}","Property owned or listed by a business, even if used for pleasure: {L1}","Exempt non-income-producing property: {XV}"], qa:[] },
+ { code:"O", title:"Residential inventory", kind:"Inventory",
+   about:"Residential real property held as business inventory and appraised as a unit. Every test must be met: same owner; contiguous or in the same subdivision; held for sale in the ordinary course of business; limited to residential use by zoning, deed restriction or highest and best use; never occupied; not leased or producing income. Classify both land and improvements as O.",
+   inc:["A builder’s unsold, never-occupied new homes","Developer lots for homes that meet every test"],
+   exc:["Homes that have sold and are occupied: {A}","Any property that fails one of the tests: classify by use"],
+   qa:[["A developer built 35 homes; 10 sold and are occupied. How are they split?","The 25 vacant homes are O; the 10 occupied homes are {A}."]] },
+ { code:"S", title:"Special inventory", kind:"Inventory",
+   about:"Dealer inventories appraised on the prior year’s total sales.",
+   subsTitle:"Inventories included", subs:[["","Dealer’s motor vehicle inventory","23.121"],["","Dealer’s vessel and outboard motor inventory (not boats over 65 feet or paddled craft under 14 feet)","23.124"],["","Dealer’s heavy equipment inventory (1,500 lb. or more; farm, construction, industrial, maritime, mining or forestry)","23.1241"],["","Retail manufactured housing inventory","23.127"]],
+   inc:[], exc:["Heavy equipment inventory that doesn’t qualify for special appraisal (get legal advice): {L1}"], qa:[] },
+ { code:"X", title:"Totally exempt property", kind:"Exempt",
+   about:"Property that meets an exemption’s legal requirements, reported under X codes. Some exemptions need no application (public property, implements of husbandry, family supplies, farm products); some are local option. Use XV only when no other X code fits.",
+   subsTitle:"Exemption codes", subs:[["XA","Public property for housing indigent persons","11.111"],["XD","Improving property for housing with volunteer labor","11.181"],["XE","Community housing development organizations","11.182"],["XF","Assisting ambulatory health care centers","11.183"],["XG","Primarily performing charitable functions","11.184"],["XH","Developing model colonia subdivisions","11.185"],["XI","Youth spiritual, mental and physical development organizations","11.19"],["XJ","Private schools","11.21"],["XL","Organizations providing economic development services to the local community","11.231"],["XM","Marine cargo containers","11.25"],["XN","Motor vehicles leased for personal use","11.252"],["XO","Motor vehicles for income production and personal use","11.254"],["XP","Offshore drilling equipment not in use","11.271"],["XQ","Intracoastal waterway dredge disposal site","11.29"],["XR","Nonprofit water or wastewater corporation","11.30"],["XS","Raw cocoa and green coffee held in Harris County","11.33"],["XT","Limitation on taxes in certain municipalities","11.34"],["XU","Miscellaneous exemptions","11.23"],["XV","Other exemptions, including public property, religious and charitable organizations, and exempt vehicles and personal property",""]],
+   inc:["Mineral interests and business personal property under the minimum exemption amount: the appropriate X code"],
+   exc:["Exempt property that later becomes taxable: reclassify by use (an old school turned into offices becomes {F1})"],
+   qa:[["A school district buys a house for administrative offices. How is it classified?","Reclassify it from {A} to XV: public property used for a public purpose."]] },
+];
+const ALIAS = { XV:"X", XA:"X", XD:"X", XE:"X", XF:"X", XG:"X", XH:"X", XI:"X", XJ:"X", XL:"X", XM:"X", XN:"X", XO:"X", XP:"X", XQ:"X", XR:"X", XS:"X", XT:"X", XU:"X",
+  J1:"J", J2:"J", J3:"J", J4:"J", J5:"J", J6:"J", J7:"J", J8:"J", J9:"J", H1:"H", G:"G1", M:"M1", L:"L1", C:"C1", D:"D1", F:"F1" };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const target = code => ALIAS[code] || code;
+function rich(s, q) {
+  // Links first, then highlight search words outside of tags.
+  let h = esc(s).replace(/\{([A-Z0-9]+)\}/g, (_, c) => `<a class="xref" href="#${target(c)}" data-go="${target(c)}">${c}</a>`)
+                .replace(/\[§ ([0-9.]+)\]/g, (_, n) => `<a href="/tax-code/#q=${encodeURIComponent("Sec. " + n)}">§ ${n}</a>`);
+  if (q) for (const w of q) h = h.replace(new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(?![^<]*>)`, "gi"), "<mark>$1</mark>");
+  return h;
+}
+const secLink = n => n ? `<a href="/tax-code/#q=${encodeURIComponent("Sec. " + n)}">§ ${n}</a>` : "";
+const text = c => [c.code, c.title, c.kind, c.about, ...(c.inc||[]), ...(c.exc||[]), ...(c.subs||[]).flat(), ...(c.qa||[]).flat()].join(" ").toLowerCase();
+
+let kind = "all";
+function render() {
+  const raw = $("q").value.trim();
+  const words = raw.toLowerCase().split(/\s+/).filter(w => w.length > 1 || /^[a-z]$/i.test(raw));
+  const exact = raw.toUpperCase().replace(/^CATEGORY\s+/, "");
+  let list = C.filter(c => kind === "all" || c.kind === kind);
+  let ranked;
+  if (!raw) ranked = list;
+  else if (C.some(c => c.code === target(exact)) && /^[A-Z][0-9A-Z]?$/.test(exact)) ranked = list.filter(c => c.code === target(exact));
+  else {
+    // Rank by where the words appear: title and description count most; "goes elsewhere" mentions count least.
+    const parts = c => [[c.code + " " + c.title, 6], [c.about + " " + (c.subs || []).flat().join(" "), 3], [(c.inc || []).join(" "), 3], [(c.qa || []).flat().join(" "), 1], [(c.exc || []).join(" "), 0.25]].map(([t, w]) => [t.toLowerCase(), w]);
+    ranked = list.map(c => { const t = text(c), ps = parts(c); const score = words.reduce((s, w) => s + ps.reduce((a, [pt, wt]) => a + (pt.includes(w) ? wt : 0), 0), 0); return { c, score, all: words.every(w => t.includes(w)) }; })
+      .filter(x => x.all).sort((a, b) => b.score - a.score).map(x => x.c);
+  }
+  const hi = raw && !/^[A-Z][0-9A-Z]?$/i.test(raw) ? words : null;
+  $("count").textContent = raw || kind !== "all" ? `${ranked.length} of ${C.length}` : `${C.length} categories`;
+  $("index").innerHTML = C.map(c => `<a href="#${c.code}" data-go="${c.code}" class="${ranked.includes(c) ? "" : "dim"}">${c.code}</a>`).join("");
+  if (!ranked.length) { $("list").innerHTML = `<p class="empty">No category matches “${esc(raw)}”. Try fewer or different words.</p>`; return; }
+  $("list").innerHTML = ranked.map(c => `
+    <article class="cat" id="${c.code}">
+      <header><div class="code" aria-hidden="true">${c.code}</div><div class="kind">${esc(c.kind)}</div><h2><span class="visually-hidden" style="position:absolute;left:-9999px">Category ${c.code}: </span>${rich(c.title, hi)}</h2></header>
+      <div class="body">
+        <p>${rich(c.about, hi)}</p>
+        ${(c.inc?.length || c.exc?.length) ? `<div class="cols">
+          ${c.inc?.length ? `<div><h3>Includes</h3><ul>${c.inc.map(x => `<li>${rich(x, hi)}</li>`).join("")}</ul></div>` : "<div></div>"}
+          ${c.exc?.length ? `<div><h3>Goes elsewhere</h3><ul>${c.exc.map(x => `<li>${rich(x, hi)}</li>`).join("")}</ul></div>` : ""}
+        </div>` : ""}
+        ${c.subs ? `<div class="subs"><h3>${esc(c.subsTitle)}</h3><table>${c.subs.map(s => `<tr${s[0] ? ` id="${s[0]}"` : ""}>${s[0] ? `<td>${s[0]}</td>` : ""}<td${s[0] ? "" : ` colspan="2"`}>${rich(s[1], hi)}</td>${s.length > 2 ? `<td class="sec">${secLink(s[2])}</td>` : ""}</tr>`).join("")}</table></div>` : ""}
+        ${c.qa?.length ? `<div class="qa"><h3>Classification questions</h3>${c.qa.map(([q, a]) => `<details${hi && (q + a).toLowerCase().includes(hi[0]) ? " open" : ""}><summary>${rich(q, hi)}</summary><p>${rich(a, hi)}</p></details>`).join("")}</div>` : ""}
+      </div>
+    </article>`).join("");
+}
+
+function go(code) {
+  const c = target(code);
+  if (!document.getElementById(c) || [...document.querySelectorAll(".cat")].length < C.length) { $("q").value = ""; kind = "all"; syncChips(); render(); }
+  const el = document.getElementById(c);
+  if (el) { el.scrollIntoView({ block: "start" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); history.replaceState(null, "", "#" + c); }
+}
+function syncChips() { document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.kind === kind))); }
+
+let t; $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 100); });
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { kind = c.dataset.kind; syncChips(); render(); }));
+document.addEventListener("click", e => { const a = e.target.closest("[data-go]"); if (a) { e.preventDefault(); go(a.dataset.go); } });
+render();
+const fromHash = () => { if (location.hash.length > 1) { const h = decodeURIComponent(location.hash.slice(1)).toUpperCase(); setTimeout(() => go(h), 0); } };
+window.addEventListener("hashchange", fromHash);
+fromHash();
+</script>
+</body>
+</html>
