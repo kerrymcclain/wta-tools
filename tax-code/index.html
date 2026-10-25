@@ -523,12 +523,34 @@ button.notice-btn { background: transparent; color: #4A3800; box-shadow: inset 0
     $("empty").hidden = true; $("pages").hidden = false;
     $("q").disabled = false;
     buildViewer();
-    const last = ls.get("tcs.query") || "";
+    // A link like /tax-code/#q=Sec.%2041.44 (used by the other WTA tools) opens with that search; otherwise restore the last one.
+    const linked = hashQuery();
+    const last = linked ?? (ls.get("tcs.query") || "");
     $("wholeWord").checked = ls.get("tcs.whole") === "1";
     $("q").value = last;
     runSearch();
+    if (linked && state.hits.length) setActive(linkedHitIndex(linked));
     if (window.matchMedia("(min-width: 761px)").matches) $("q").focus();
   }
+
+  // For a linked "Sec. 41.44" search, start on the match inside § 41.44 itself rather than a cross-reference elsewhere.
+  function linkedHitIndex(q) {
+    const m = q.trim().match(/^Sec\.?\s+(\S+?)\.?$/i);
+    if (!m) return 0;
+    const i = state.hits.findIndex(h => sectionFor(h.p, h.rs)?.num === m[1]);
+    return i >= 0 ? i : 0;
+  }
+  function hashQuery() {
+    const m = location.hash.match(/^#q=(.*)$/);
+    if (!m) return null;
+    try { return decodeURIComponent(m[1].replace(/\+/g, " ")); } catch { return null; }
+  }
+  window.addEventListener("hashchange", () => {
+    const q = hashQuery();
+    if (q == null || $("q").disabled) return;
+    $("q").value = q; runSearch();
+    if (state.hits.length) setActive(linkedHitIndex(q));
+  });
 
   /* ---------- Edition & date ---------- */
   // The cover page reads "TEXAS PROPERTY TAX CODE 2025 EDITION"; fall back to the 96-297-YY file name.
