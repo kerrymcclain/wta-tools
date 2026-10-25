@@ -6,7 +6,7 @@ Free tools from West Texas Analytics, LLC, published at **https://tools.westtexa
 |---|---|
 | `/` | Landing page listing the tools |
 | `/tax-code/` | Property Tax Code Search: visitors open the Comptroller's PDF in their own browser and search it. Nothing is uploaded. |
-| `/tax-calendar/` | Texas Property Tax Calendar: statutory deadlines for any year, rolled to the next business day for weekends and holidays (§ 1.06), with audience filters and .ics export. |
+| `/tax-calendar/` | Texas Property Tax Calendar: statutory deadlines for any year, rolled to the next business day for weekends and holidays (§ 1.06), with audience filters and .ics export. Two views: a list, and a wheel of the tax year (phases as wedges, key dates as notches; `?view=wheel`). |
 | `/categories/` | State Property Categories: searchable state property category codes with descriptions, examples and edge cases. |
 
 Section numbers in the calendar and category lookup link into the Tax Code Search with `/tax-code/#q=Sec.%2041.44`, which opens the PDF at that section.
