@@ -80,8 +80,15 @@
   .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); align-items: center; }
   .tag { border-radius: 4px; padding: 1px 7px; font-size: 12px; font-weight: 500; background: var(--soft); color: var(--ink); }
   .tag.O { background: #E3EEF5; } .tag.AD { background: #F5E6D3; } .tag.ARB { background: #EDE3F2; } .tag.TU { background: #E2F0E4; } .tag.ST { background: #ECECEC; }
-  .secs a, .secs span { font-family: var(--mono); font-size: 12.5px; }
-  .secs a { text-decoration: none; border-bottom: 1px dotted var(--sky); }
+  .links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-top: 7px; font-size: 13px; }
+  .links .lbl { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+  .links a, .links .plain { display: inline-block; padding: 1px 8px; border: 1px solid #C9D3DB; border-radius: 999px; background: var(--panel); color: var(--sky); text-decoration: none; font-weight: 500; line-height: 1.6; }
+  .links a:hover, .links a:focus-visible { background: var(--sky); border-color: var(--sky); color: var(--cream); }
+  .links a.sec, .links .plain { font-family: var(--mono); font-size: 12px; }
+  .links .plain { color: var(--muted); border-style: dashed; }
+  .links a .ext { font-size: 11px; margin-left: 3px; opacity: .75; }
+  .links a .fno { font-family: var(--mono); font-size: 12px; margin-right: 5px; }
+  @media print { .links a { border: 0; padding: 0; } }
   .roll { font-size: 13px; color: var(--red); margin-top: 4px; }
   .note { font-size: 13px; color: var(--muted); margin-top: 4px; }
   .empty { padding: 30px 4px; color: var(--muted); }
@@ -201,86 +208,86 @@ const D = [
   [1, 1, "Half of the appraisal review board members begin two-year terms; ARB commissioners begin one-year terms", ["ARB"], ["6.41(d-8)"], { roll:false }],
   [1, 1, "ARB commissioners (where appointed) send the list of proposed ARB members to the local administrative district judge", ["ARB"], ["6.41(d-7)"]],
   [1, 1, "Chief appraiser notifies the Comptroller of eligibility to serve", ["AD"], ["6.05(c)"]],
-  [1, 1, "Temporary exemption for disaster-damaged property ends in the first year the property is reappraised under § 25.18", ["O"], ["11.35(k)"], { roll:false }],
-  [1, 2, "Rendition period begins", ["O"], ["22.23(a)"], { roll:false }],
+  [1, 1, "Temporary exemption for disaster-damaged property ends in the first year the property is reappraised under § 25.18", ["O"], ["11.35(k)"], { roll:false, forms:["50-312"] }],
+  [1, 2, "Rendition period begins", ["O"], ["22.23(a)"], { roll:false, forms:["50-144","50-142"] }],
   [1, 10, "If last year’s tax bill is mailed after this date, its delinquency date is postponed", ["TU","O"], ["31.04(a)"], { roll:false }],
-  [1, 31, "Comptroller certifies preliminary School District Property Value Study findings. School districts and property owners may protest by the 40th day after certification", ["ST","TU"], ["Gov’t Code 403.302(g)","Gov’t Code 403.303(a)"]],
+  [1, 31, "Comptroller certifies preliminary School District Property Value Study findings. School districts and property owners may protest by the 40th day after certification", ["ST","TU"], ["Gov’t Code 403.302(g)","Gov’t Code 403.303(a)"], { forms:["50-210-a"] }],
   [1, 31, "Chief appraiser delivers applications for agricultural designation and for exemptions that require a new application each year", ["AD"], ["11.44(a)","23.43(e)"]],
   [1, 31, "Installment plan (disabled or 65+ homeowners, disabled veterans, surviving spouses): notice of intent and first installment due, when the delinquency date is Feb. 1", ["O"], ["31.031(a-1)"]],
   [1, 31, "Disaster-area installment plan: first installment due, when the delinquency date is Feb. 1", ["O"], ["31.032(b)"]],
   [1, 31, "Appraisal district gives public notice of the capitalization rate for the low- and moderate-income housing exemption", ["AD"], ["11.1825(r)"]],
-  [2, 1, "Dealer’s inventory declarations due: motor vehicles, vessels and outboard motors, heavy equipment, retail manufactured housing", ["O"], ["23.121(f)","23.124(f)","23.1241(f)","23.127(f)"]],
+  [2, 1, "Dealer’s inventory declarations due: motor vehicles, vessels and outboard motors, heavy equipment, retail manufactured housing", ["O"], ["23.121(f)","23.124(f)","23.1241(f)","23.127(f)"], { forms:["50-244","50-259","50-265","50-267"] }],
   [2, 1, "Last year’s taxes become delinquent if paid after this date (bills mailed on or before Jan. 10)", ["O","TU"], ["31.02(a)","31.04(a)"], { key:true }],
   [2, 1, "Rollback tax and interest for a change of use of 1-d, 1-d-1, timber or restricted-use timber land become delinquent, if the bill was delivered at least 20 days earlier", ["O","TU"], ["23.46(c)","23.55(e)","23.76(e)","23.9807(f)"]],
   [2, 15, "Tax collector disburses inventory tax escrow funds to taxing units", ["TU"], ["23.122(k)","23.1242(j)","23.125(k)","23.128(j)"]],
-  [2, "last", "Last day to request separate appraisal of an interest in a cooperative housing corporation", ["O"], ["23.19(c)"]],
+  [2, "last", "Last day to request separate appraisal of an interest in a cooperative housing corporation", ["O"], ["23.19(c)"], { forms:["50-173"] }],
   [3, 31, "Second quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
   [3, 31, "Installment plans: second installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a)","31.031(a-1)","31.032(a)","31.032(b)"]],
-  [3, 31, "Community housing development organizations file their list of property acquired or sold during the past year", ["O"], ["11.182(i)"]],
+  [3, 31, "Community housing development organizations file their list of property acquired or sold during the past year", ["O"], ["11.182(i)"], { forms:["50-264"] }],
   [4, 1, "Local governments file applications with the Comptroller for disabled veteran assistance payments (previous fiscal year)", ["TU"], ["Local Gov’t Code 140.011(e)"]],
   [4, 1, "Notices of appraised value for single-family residence homesteads", ["AD","O"], ["25.19(a)"], { key:true, note:"Or as soon as practicable after this date." }],
   [4, 1, "Written notice to homeowners whose homestead exemption was canceled or reduced", ["AD","O"], ["25.193(a)"], { note:"Or as soon as practicable after this date." }],
   [4, 1, "Chief appraiser tells taxing units the form in which the appraisal roll will be provided", ["AD","TU"], ["26.01(a)"]],
-  [4, 15, "Renditions and property reports due for most property", ["O"], ["22.23(a)","22.23(b)","22.21"], { key:true, note:"The chief appraiser must extend to May 15 on written request." }],
-  [4, 30, "Exemption applications due", ["O"], ["11.43(d)"], { key:true, note:"Some organizations have one year after acquiring property (§§ 11.42(d), 11.43(d)). A homestead acquired after Jan. 1 can qualify for the rest of the year (§ 11.42(f))." }],
+  [4, 15, "Renditions and property reports due for most property", ["O"], ["22.23(a)","22.23(b)","22.21"], { key:true, note:"The chief appraiser must extend to May 15 on written request.", forms:["50-144","50-142","50-141"] }],
+  [4, 30, "Exemption applications due", ["O"], ["11.43(d)"], { key:true, note:"Some organizations have one year after acquiring property (§§ 11.42(d), 11.43(d)). A homestead acquired after Jan. 1 can qualify for the rest of the year (§ 11.42(f)).", forms:["50-114","50-135"] }],
   [4, 30, "Notify the chief appraiser if property no longer qualifies for an exemption that doesn’t require annual application", ["O"], ["11.43(g)"]],
-  [4, 30, "Applications for special appraisal (1-d, 1-d-1 open-space, timber, restricted-use timber, recreational-park-scenic, public access airport), and notices that property no longer qualifies", ["O"], ["23.43(b)","23.54(d)","23.75(d)","23.84(b)","23.94(b)","23.9804(e)"], { key:true }],
-  [4, 30, "Railroad rolling stock reports due", ["O"], ["24.32(e)"]],
-  [4, 30, "Requests for separate listing (land and improvements, standing timber, undivided interests), proportionate taxing of PUD association property, or joint taxation of mineral interests", ["O"], ["25.08(c)","25.09(b)","25.10(c)","25.11(b)","25.12(b)"]],
+  [4, 30, "Applications for special appraisal (1-d, 1-d-1 open-space, timber, restricted-use timber, recreational-park-scenic, public access airport), and notices that property no longer qualifies", ["O"], ["23.43(b)","23.54(d)","23.75(d)","23.84(b)","23.94(b)","23.9804(e)"], { key:true, forms:["50-165","50-129","50-167","50-281","50-168","50-169"] }],
+  [4, 30, "Railroad rolling stock reports due", ["O"], ["24.32(e)"], { forms:["50-139"] }],
+  [4, 30, "Requests for separate listing (land and improvements, standing timber, undivided interests), proportionate taxing of PUD association property, or joint taxation of mineral interests", ["O"], ["25.08(c)","25.09(b)","25.10(c)","25.11(b)","25.12(b)"], { forms:["50-111","50-170","50-171","50-172"] }],
   [4, 30, "Chief appraiser certifies an estimate of taxable value to counties, cities and school districts (counties and cities may waive)", ["AD","TU"], ["26.01(e)","26.01(f)","Educ. Code 44.004(g)"]],
-  [4, 30, "Renditions for property regulated by the PUC, Railroad Commission, Surface Transportation Board or FERC", ["O"], ["22.23(d)"], { note:"The chief appraiser must extend to May 15 on written request." }],
-  [4, 30, "Applications for interstate allocation", ["O"], ["21.09(b)"], { note:"The chief appraiser may extend up to 30 days for good cause." }],
+  [4, 30, "Renditions for property regulated by the PUC, Railroad Commission, Surface Transportation Board or FERC", ["O"], ["22.23(d)"], { note:"The chief appraiser must extend to May 15 on written request.", forms:["50-152","50-156","50-157"] }],
+  [4, 30, "Applications for interstate allocation", ["O"], ["21.09(b)"], { note:"The chief appraiser may extend up to 30 days for good cause.", forms:["50-147","50-146","50-145"] }],
   [5, 1, "Notices of appraised value for all other property", ["AD","O"], ["25.19(a)"], { key:true, note:"Or as soon as practicable after this date." }],
   [5, 1, "Taxing units may file resolutions to change how the appraisal district is financed", ["TU"], ["6.061(c)"], { end:14, roll:false }],
   [5, 1, "Chief appraiser publishes notice of protest procedures in a local newspaper", ["AD"], ["41.70(a)","41.70(b)","41.41(b)"], { end:15, roll:false }],
   [5, 2, "Taxing units begin notifying delinquent taxpayers of the July 1 attorney collection penalty (notice period runs through June 1)", ["TU"], ["33.07(d)"], { roll:false }],
   [5, 15, "Appraisal review board adopts its hearing procedures (send to the Comptroller within 15 days)", ["ARB"], ["41.01(c)","41.01(d)"]],
-  [5, 15, "Extended rendition deadline, if an extension was requested", ["O"], ["22.23(b)"], { note:"The chief appraiser may add 15 more days for good cause." }],
+  [5, 15, "Extended rendition deadline, if an extension was requested", ["O"], ["22.23(b)"], { note:"The chief appraiser may add 15 more days for good cause.", forms:["50-144","50-142"] }],
   [5, 15, "Chief appraiser submits appraisal records to the review board", ["AD","ARB"], ["25.01(a)","25.22(a)"], { note:"Or as soon as practicable after this date." }],
-  [5, 15, "Protest deadline for most property", ["O"], ["41.44(a)(1)"], { key:true, note:"Or the 30th day after the notice of appraised value was delivered, whichever is later." }],
+  [5, 15, "Protest deadline for most property", ["O"], ["41.44(a)(1)"], { key:true, note:"Or the 30th day after the notice of appraised value was delivered, whichever is later.", forms:["50-132","50-195","50-283"] }],
   [5, 19, "Chief appraiser determines whether enough taxing units filed resolutions to change the finance method", ["AD"], ["6.061(d)"]],
   [5, 24, "Chief appraiser notifies taxing units of any change in the finance method", ["AD","TU"], ["6.061(d)"]],
-  [5, 31, "Taxing units file challenges with the appraisal review board", ["TU","ARB"], ["41.04"], { note:"Or 15 days after the records are submitted to the ARB, whichever is later." }],
+  [5, 31, "Taxing units file challenges with the appraisal review board", ["TU","ARB"], ["41.04"], { note:"Or 15 days after the records are submitted to the ARB, whichever is later.", forms:["50-215"] }],
   [5, 31, "Installment plans: third installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a)","31.031(a-1)","31.032(a)","31.032(b)"]],
-  [5, 31, "Religious organization denied a § 11.20 exemption amends its charter and files a new application", ["O"], ["11.421(b)"], { note:"Or the 60th day after the denial notice, whichever is later." }],
+  [5, 31, "Religious organization denied a § 11.20 exemption amends its charter and files a new application", ["O"], ["11.421(b)"], { note:"Or the 60th day after the denial notice, whichever is later.", forms:["50-117"] }],
   [5, 31, "Taxing units may act to extend the freeport period for aircraft parts up to 730 days", ["TU"], ["11.251(l)"]],
   [6, 1, "End of the attorney collection penalty notice period that began May 2", ["TU"], ["33.07(d)"]],
   [6, 14, "Chief appraiser sends the proposed appraisal district budget to the board and taxing units", ["AD","TU"], ["6.06(a)","6.06(i)"], { note:"Unless the district has changed its fiscal year." }],
-  [6, 15, "Chief appraiser acts on late-filed freeport exemption applications", ["AD","O"], ["11.4391(a)"], { note:"Or the 60th day after a § 22.22 notice, if applicable." }],
+  [6, 15, "Chief appraiser acts on late-filed freeport exemption applications", ["AD","O"], ["11.4391(a)"], { note:"Or the 60th day after a § 22.22 notice, if applicable.", forms:["50-113"] }],
   [6, 16, "Appraisal district board may begin passing a resolution to change the finance method (needs unanimous taxing unit approval; period ends before Aug. 15)", ["AD"], ["6.061(a)"], { roll:false }],
   [6, 30, "Second half of a split payment of last year’s taxes due", ["O"], ["31.03(a)"]],
   [6, 30, "Third quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
   [6, 30, "Last day to create a taxing unit that will levy taxes this year", ["TU"], ["26.12(d)"]],
   [6, 30, "Last day to adopt local option percentage homestead exemptions", ["TU"], ["11.13(n)"], { key:true }],
-  [6, 30, "Private school denied a § 11.21 exemption amends its charter and files a new application", ["O"], ["11.422(a)(1)"], { note:"Or the 60th day after the denial notice, whichever is later." }],
+  [6, 30, "Private school denied a § 11.21 exemption amends its charter and files a new application", ["O"], ["11.422(a)(1)"], { note:"Or the 60th day after the denial notice, whichever is later.", forms:["50-119"] }],
   [7, 1, "Delinquent taxes reach the full 12 percent penalty", ["O","TU"], ["33.01(a)"], { roll:false, key:true }],
   [7, 1, "Additional attorney collection penalty may be added to taxes still delinquent (taxing units with a collection contract)", ["O","TU"], ["33.07(a)","33.08(a)"], { roll:false }],
-  [7, 1, "Review and protests of railroad rolling stock appraisals complete; chief appraiser certifies allocated value to the Comptroller", ["AD","ST"], ["24.35(b)","24.36"], { note:"Or as soon as practicable." }],
-  [7, 20, "Appraisal review board approves the appraisal records", ["ARB"], ["41.12(a)"], { key:true, note:"Unless more than 5% of total appraised value is still under protest. In counties of 1 million or more, the board may postpone to Aug. 30 or raise the threshold to 10%." }],
+  [7, 1, "Review and protests of railroad rolling stock appraisals complete; chief appraiser certifies allocated value to the Comptroller", ["AD","ST"], ["24.35(b)","24.36"], { note:"Or as soon as practicable.", forms:["50-137"] }],
+  [7, 20, "Appraisal review board approves the appraisal records", ["ARB"], ["41.12(a)"], { key:true, note:"Unless more than 5% of total appraised value is still under protest. In counties of 1 million or more, the board may postpone to Aug. 30 or raise the threshold to 10%.", forms:["50-225"] }],
   [7, 25, "Comptroller certifies the apportionment of railroad rolling stock value to counties", ["ST"], ["24.38","24.40"]],
   [7, 25, "Chief appraiser certifies the appraisal roll to each taxing unit", ["AD","TU"], ["26.01(a)"], { key:true }],
   [7, 25, "If the ARB hasn’t approved the records by July 20, chief appraiser certifies an estimate of taxable value to each assessor", ["AD","TU"], ["26.01(a-1)"]],
   [7, 31, "Installment plans: fourth installment due (Feb. 1 delinquency date)", ["O"], ["31.031(a-1)","31.032(b)"]],
-  [7, 31, "Last day to apply to have inventory appraised as of Sept. 1 next year", ["O"], ["23.12(f)"]],
+  [7, 31, "Last day to apply to have inventory appraised as of Sept. 1 next year", ["O"], ["23.12(f)"], { forms:["50-164"] }],
   [8, 1, "Assessor submits the appraisal roll and the collector submits the anticipated collection rate to the governing body", ["TU"], ["26.04(b)"], { note:"Or as soon as practicable." }],
-  [8, 7, "Taxing units publicize no-new-revenue and voter-approval rates, fund balances and debt schedules (not school districts, small taxing units or certain water districts)", ["TU"], ["26.04(e)","26.052(b)","Water Code 49.107(g)","Water Code 49.108(f)"], { key:true, note:"Or as soon as practicable." }],
+  [8, 7, "Taxing units publicize no-new-revenue and voter-approval rates, fund balances and debt schedules (not school districts, small taxing units or certain water districts)", ["TU"], ["26.04(e)","26.052(b)","Water Code 49.107(g)","Water Code 49.108(f)"], { key:true, note:"Or as soon as practicable.", forms:["50-212","50-856","50-859"] }],
   [8, 7, "Chief appraiser posts the property tax database notice on the website and publishes it in a local newspaper", ["AD"], ["26.04(e-2)","26.04(e-6)","26.17"], { note:"Or as soon as practicable." }],
   [8, 14, "Last day for the appraisal district board to pass a resolution changing the finance method, or the number or selection of directors", ["AD"], ["6.061(a)","6.031(a)"]],
   [8, 15, "Comptroller certifies final School District Property Value Study findings to the commissioner of education", ["ST"], ["Comptroller Rule 9.4317(d)"]],
   [8, 30, "Appraisal review board approval in counties of 1 million or more, if postponed from July 20", ["ARB"], ["41.12(c)(1)"]],
   [8, 31, "Deadline tied to waiving penalties and interest when a tax bill wasn’t delivered (conditions apply)", ["TU"], ["33.011(b)(1)"]],
   [8, 31, "Taxing units file resolutions opposing a change in the finance method or in the number or selection of directors", ["TU"], ["6.061(a)","6.031(a)"]],
-  [8, 31, "Motor vehicle dealers file to opt out of dealer inventory treatment for next year (if eligible)", ["O"], ["23.121(a)(3)(D)(iii)"]],
-  [9, 1, "Inventory may be valued as of this date at the owner’s written option", ["O"], ["23.12(f)"], { roll:false }],
+  [8, 31, "Motor vehicle dealers file to opt out of dealer inventory treatment for next year (if eligible)", ["O"], ["23.121(a)(3)(D)(iii)"], { forms:["50-815"] }],
+  [9, 1, "Inventory may be valued as of this date at the owner’s written option", ["O"], ["23.12(f)"], { roll:false, forms:["50-164"] }],
   [9, 14, "Appraisal district board adopts next year’s budget", ["AD"], ["6.06(b)","6.06(i)"], { key:true, note:"Unless the district has changed its fiscal year." }],
   [9, 14, "Appraisal district board notifies taxing units in writing of any rejected proposal to change the finance method or directors", ["AD","TU"], ["6.061(a)","6.031(a)"]],
-  [9, 29, "Taxing units adopt this year’s tax rate", ["TU"], ["26.05(a)","26.05(c)"], { key:true, note:"Or the 60th day after receiving the certified roll, whichever is later. A unit that misses it gets the lower of its no-new-revenue rate or last year’s rate and must ratify within 5 days." }],
+  [9, 29, "Taxing units adopt this year’s tax rate", ["TU"], ["26.05(a)","26.05(c)"], { key:true, note:"Or the 60th day after receiving the certified roll, whichever is later. A unit that misses it gets the lower of its no-new-revenue rate or last year’s rate and must ratify within 5 days.", forms:["50-856","50-859"] }],
   [9, 30, "Fourth quarterly payment on the appraisal district’s budget due", ["TU"], ["6.06(e)"]],
   [10, 1, "Tax bills mailed", ["TU","O"], ["31.01(a)"], { key:true, note:"Or as soon as practicable after this date." }],
   [11, 30, "First half of a split tax payment due", ["O"], ["31.03(a)"]],
   [12, 1, "Appraisal office may run a mail survey to verify homestead eligibility", ["AD"], ["11.47(a)"], { end:31, roll:false }],
   [12, 31, "First quarterly payment on next year’s appraisal district budget due", ["TU"], ["6.06(e)"]],
-  [12, 31, "Last day for taxing units to act to tax goods-in-transit next year", ["TU"], ["11.253(j)"]],
+  [12, 31, "Last day for taxing units to act to tax goods-in-transit next year", ["TU"], ["11.253(j)"], { forms:["50-758"] }],
 ];
 const AUD = { O:"Property owners", AD:"Appraisal district", ARB:"Review board", TU:"Taxing units", ST:"Comptroller" };
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -332,15 +339,66 @@ function buildYear(y) {
     const stat = new Date(y, m - 1, dd);
     const end = o.end ? new Date(y, m - 1, o.end) : null;
     const rolled = o.roll === false || end ? { date: stat, reasons: [] } : rollForward(stat, hol);
-    return { i, stat, end, eff: rolled.date, reasons: rolled.reasons, title, aud, secs, key: !!o.key, note: o.note || "" };
+    return { i, stat, end, eff: rolled.date, reasons: rolled.reasons, title, aud, secs, key: !!o.key, note: o.note || "", forms: o.forms || [] };
   }).sort((a, b) => a.eff - b.eff || a.i - b.i);
 }
 
+const FORMS = { // Comptroller property tax forms: number → short name (comptroller.texas.gov/forms/<number>.pdf)
+  "50-111": "Separate taxation of improvements",
+  "50-113": "Freeport exemption",
+  "50-114": "Homestead exemption",
+  "50-117": "Religious organization exemption",
+  "50-119": "Private school exemption",
+  "50-129": "1-d-1 open-space ag",
+  "50-135": "Disabled veteran exemption",
+  "50-137": "Certification to Comptroller",
+  "50-139": "Railroad rolling stock statement",
+  "50-141": "Real property rendition",
+  "50-142": "Personal property rendition",
+  "50-144": "Business personal property rendition",
+  "50-145": "Rendition for allocation",
+  "50-146": "Watercraft allocation",
+  "50-147": "Interstate allocation",
+  "50-152": "Utility rendition",
+  "50-156": "Railroad rendition",
+  "50-157": "Pipeline rendition",
+  "50-164": "Sept. 1 inventory appraisal",
+  "50-165": "1-d ag appraisal",
+  "50-167": "1-d-1 timber",
+  "50-168": "Recreational, park, scenic",
+  "50-169": "Public access airport",
+  "50-170": "Separate taxation of standing timber",
+  "50-171": "Separate taxation of undivided interest",
+  "50-172": "Joint taxation of mineral interest",
+  "50-173": "Cooperative housing separate taxation",
+  "50-195": "Protest & appeal procedures",
+  "50-132": "Notice of protest",
+  "50-283": "Affidavit of evidence",
+  "50-210-a": "PVS protest petition",
+  "50-212": "Notice of tax rates",
+  "50-215": "Petition challenging appraisal records",
+  "50-225": "Order approving appraisal records",
+  "50-244": "Dealer motor vehicle declaration",
+  "50-259": "Dealer vessel/outboard declaration",
+  "50-265": "Dealer heavy equipment declaration",
+  "50-267": "Retail manufactured housing declaration",
+  "50-264": "CHDO property list",
+  "50-281": "Restricted-use timber",
+  "50-312": "Disaster temporary exemption",
+  "50-758": "Goods-in-transit exemption",
+  "50-815": "Dealer vehicle election to render",
+  "50-856": "Tax rate worksheet (non-school)",
+  "50-859": "Tax rate worksheet (school)"
+};
 /* Section links into the Tax Code Search (Tax Code sections only) */
 function secHtml(s) {
-  if (/[A-Za-z]/.test(s.replace(/\([a-z0-9-]+\)/gi, ""))) return `<span>${esc(s)}</span>`;
+  if (/[A-Za-z]/.test(s.replace(/\([a-z0-9-]+\)/gi, ""))) return `<span class="plain" title="Not in the Tax Code">${esc(s)}</span>`;
   const base = s.replace(/\(.*$/, "");
-  return `<a href="/tax-code/#q=${encodeURIComponent("Sec. " + base)}" title="Open § ${esc(base)} in the Tax Code Search">§ ${esc(s)}</a>`;
+  return `<a class="sec" href="/tax-code/#q=${encodeURIComponent("Sec. " + base)}" title="Read § ${esc(base)} in the Tax Code Search">§ ${esc(s)}</a>`;
+}
+const formUrl = n => `https://comptroller.texas.gov/forms/${n}.pdf`;
+function formHtml(n) {
+  return `<a href="${formUrl(n)}" target="_blank" rel="noopener" title="Comptroller Form ${n}: ${esc(FORMS[n])} (PDF, opens in a new tab)"><span class="fno">${n}</span>${esc(FORMS[n])}<span class="ext" aria-hidden="true">↗</span></a>`;
 }
 
 /* State */
@@ -368,7 +426,7 @@ function matches(e, q) {
   if (aud !== "all" && !e.aud.includes(aud)) return false;
   if (keyOnly && !e.key) return false;
   if (!q) return true;
-  const hay = (e.title + " " + e.note + " " + e.secs.join(" ") + " " + e.aud.map(a => AUD[a]).join(" ")).toLowerCase();
+  const hay = (e.title + " " + e.note + " " + e.secs.join(" ") + " " + e.forms.map(n => n + " " + FORMS[n]).join(" ") + " " + e.aud.map(a => AUD[a]).join(" ")).toLowerCase();
   return q.toLowerCase().split(/\s+/).every(w => hay.includes(w.replace(/^§/, "")));
 }
 
@@ -394,7 +452,9 @@ function render() {
       <div class="when"><span class="d">${fmt(e.eff)}</span>${rng}</div>
       <div class="what"><span class="t">${esc(e.title)}</span>${e.key ? `<span class="key">Key date</span>` : ""}
         ${roll}${e.note ? `<div class="note">${esc(e.note)}</div>` : ""}
-        <div class="meta">${e.aud.map(a => `<span class="tag ${a}">${AUD[a]}</span>`).join("")}<span class="secs">${e.secs.map(secHtml).join(", ")}</span></div>
+        <div class="meta">${e.aud.map(a => `<span class="tag ${a}">${AUD[a]}</span>`).join("")}</div>
+        <div class="links"><span class="lbl">Tax Code</span>${e.secs.map(secHtml).join("")}</div>
+        ${e.forms.length ? `<div class="links"><span class="lbl">Forms</span>${e.forms.map(formHtml).join("")}</div>` : ""}
       </div></article>`;
   }
   list.innerHTML = html + `</section>`;
@@ -550,7 +610,7 @@ function ics() {
   const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//West Texas Analytics//Texas Property Tax Calendar//EN","CALSCALE:GREGORIAN","X-WR-CALNAME:Texas Property Tax " + year];
   for (const e of current) {
     const endD = new Date((e.end || e.eff)); endD.setDate(endD.getDate() + 1);
-    const desc = [e.note, e.reasons.length ? `Statutory date ${fmt(e.stat)}; rolled to next business day (§ 1.06).` : "", "For: " + e.aud.map(a => AUD[a]).join(", "), "Tax Code: " + e.secs.join(", "), "https://tools.westtexasanalytics.com/tax-calendar/"].filter(Boolean).join("\n");
+    const desc = [e.note, e.reasons.length ? `Statutory date ${fmt(e.stat)}; rolled to next business day (§ 1.06).` : "", "For: " + e.aud.map(a => AUD[a]).join(", "), "Tax Code: " + e.secs.join(", "), e.forms.length ? "Forms: " + e.forms.map(n => n + " " + formUrl(n)).join(", ") : "", "https://tools.westtexasanalytics.com/tax-calendar/"].filter(Boolean).join("\n");
     lines.push("BEGIN:VEVENT", `UID:ptc-${year}-${e.i}@tools.westtexasanalytics.com`, `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${dstr(e.eff)}`, `DTEND;VALUE=DATE:${dstr(endD)}`,
       fold("SUMMARY:" + txt((e.key ? "★ " : "") + e.title)), fold("DESCRIPTION:" + txt(desc)), "TRANSP:TRANSPARENT", "END:VEVENT");
