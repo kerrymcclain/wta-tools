@@ -137,6 +137,10 @@
     .crumbs { display: none; } .item.past { opacity: 1; } .item.upnext { background: none; }
     .month { break-inside: avoid-page; } .item { break-inside: avoid; }
   }
+  /* WTA shield watermark: fixed behind the page, shows through wherever the page has no background of its own */
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url(/watermark.svg) center 58% / min(62vmin, 520px) auto no-repeat; }
+  @media print { body::before { display: none; } }
 </style>
 </head>
 <body>
