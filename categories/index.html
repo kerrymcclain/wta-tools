@@ -57,7 +57,7 @@
   .index a:hover { border-color: var(--sky); }
   .index a.dim { opacity: .3; pointer-events: none; }
 
-  .cat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-top: 14px; overflow: hidden; scroll-margin-top: 130px; }
+  .cat { background: rgba(255, 251, 239, .72); border: 1px solid var(--line); border-radius: 12px; margin-top: 14px; overflow: hidden; scroll-margin-top: 130px; }
   .cat:target, .cat.flash { box-shadow: 0 0 0 3px var(--sun); }
   .cat > header { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; padding: 16px 18px 10px; align-items: start; }
   .code { font: 700 22px/1 var(--mono); color: var(--cream); background: var(--sky); border-radius: 8px; padding: 10px 0; min-width: 62px; text-align: center; grid-row: span 2; }
@@ -95,6 +95,10 @@
     .cat { scroll-margin-top: 12px; }
   }
   @media print { .band > nav, .controls, .index, footer { display: none !important; } body { background: #fff; } .cat { break-inside: avoid; } .qa details { display: block; } }
+  /* WTA shield watermark: fixed behind the page, shows through wherever the page has no background of its own */
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url(/watermark.svg) center 58% / min(62vmin, 520px) auto no-repeat; }
+  @media print { body::before { display: none; } }
 </style>
 </head>
 <body>
